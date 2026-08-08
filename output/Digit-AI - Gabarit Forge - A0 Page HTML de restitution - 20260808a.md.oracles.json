@@ -1,0 +1,63 @@
+{
+  "cible": "c:\\dev\\digit-ai-forge-organization\\output\\Digit-AI - Gabarit Forge - A0 Page HTML de restitution - 20260808a.md",
+  "date_iso": "2026-08-08T17:34:27.927Z",
+  "registre_version": "2.9.1",
+  "profil": "digit-ai",
+  "niveau": "note",
+  "verdict": "PASS",
+  "resume": {
+    "pass": 4,
+    "fail": 0,
+    "skip": 2,
+    "cache": 0
+  },
+  "bilan_fichiers": {
+    "jugé": [
+      "output\\Digit-AI - Gabarit Forge - A0 Page HTML de restitution - 20260808a.md"
+    ],
+    "exempté": [],
+    "délégué": [],
+    "signalé": []
+  },
+  "bilan_complet": true,
+  "exemptions_actives": [],
+  "resultats": [
+    {
+      "domaine": "Format / livraison / versioning",
+      "file": "output\\Digit-AI - Gabarit Forge - A0 Page HTML de restitution - 20260808a.md",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "domaine": "Sécurité / secrets",
+      "file": "output\\Digit-AI - Gabarit Forge - A0 Page HTML de restitution - 20260808a.md",
+      "verdict": "PASS",
+      "detail": "aucun secret détecté"
+    },
+    {
+      "domaine": "Calculs / chiffres",
+      "file": "output\\Digit-AI - Gabarit Forge - A0 Page HTML de restitution - 20260808a.md",
+      "verdict": "SKIP",
+      "detail": ""
+    },
+    {
+      "domaine": "Traçabilité des affirmations chiffrées",
+      "file": "output\\Digit-AI - Gabarit Forge - A0 Page HTML de restitution - 20260808a.md",
+      "verdict": "PASS",
+      "detail": "5 affirmation(s) chiffrée(s) contrôlée(s) — toutes sourcées/cohérentes (4 avertissement(s)) ; pourcentage « 85 % » non sourcé"
+    },
+    {
+      "domaine": "Nommage / convention de livraison",
+      "file": "output\\Digit-AI - Gabarit Forge - A0 Page HTML de restitution - 20260808a.md",
+      "verdict": "PASS",
+      "detail": "nom conforme à la convention du profil"
+    },
+    {
+      "domaine": "Cohérence inter-documents",
+      "file": "output\\Digit-AI - Gabarit Forge - A0 Page HTML de restitution - 20260808a.md",
+      "verdict": "SKIP",
+      "detail": ""
+    }
+  ],
+  "actions_couverture": []
+}
