@@ -1,3 +1,8 @@
 .env
 node_modules/
 __pycache__/
+
+# Sidecars d'oracles — régénérés à chaque exécution, jamais versionnés
+*.oracles.json
+*.oracles-cache.json
+*.oracles-historique.jsonl
