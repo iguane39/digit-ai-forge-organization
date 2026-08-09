@@ -1,0 +1,200 @@
+{
+  "registre": "Types de documents — corpus Digit-AI",
+  "decision_source": "D-04",
+  "version": "1.0.0",
+  "date_maj": "2026-08-09",
+  "_lecture": {
+    "role": "Source unique et machine-lisible des <Type> admis. D-04 promettait un référentiel tenu ; il n'existait qu'en tableau dans un document, donc ni interrogeable ni opposable à un vérificateur.",
+    "gabarit_nom": "<Projet> - <Type> <Sujet> - AAAAMMJJ<indice>.<ext>",
+    "ou_lire_le_type": "Le <Type> est le PREMIER MOT du deuxième segment du nom (segments séparés par «  -  »). Vrai de la forme héritée « Digit-AI - Inventaire Forge - … » comme de la forme Q3-bis « Forge Pilot - Schéma Écosystème - … ».",
+    "comparaison": "Insensible à la casse et aux accents : « Etude » et « Étude » désignent le même type. Les graphies alternatives réellement observées sont listées en « alias ».",
+    "premier_exemplaire_null": "null = premier exemplaire non relevé par l'inventaire de Phase 1. Ce n'est pas une absence de type, c'est une absence de relevé.",
+    "ajout_d_un_type": "Liste ouverte (D-04) : un type nouveau s'ajoute ici, avec son objet et son premier exemplaire, au lieu d'être improvisé dans un nom de fichier. L'ajout est un acte doctrinal — il se fait dans un commit qui le motive."
+  },
+  "types": [
+    {
+      "type": "Architecture",
+      "objet": "Description d'une architecture technique cible ou existante",
+      "alias": [],
+      "premier_exemplaire": null,
+      "date_ajout": "2026-08-08",
+      "origine": "inventaire Phase 1"
+    },
+    {
+      "type": "Audit",
+      "objet": "Examen d'un existant contre une grille, avec constats et preuves",
+      "alias": [],
+      "premier_exemplaire": null,
+      "date_ajout": "2026-08-08",
+      "origine": "inventaire Phase 1"
+    },
+    {
+      "type": "Brief",
+      "objet": "Cadre court d'une demande passée à un tiers ou à une forge",
+      "alias": [],
+      "premier_exemplaire": "Digit-AI - Brief Analyse POC Mobi+ vs RFP - 20260527a.md",
+      "date_ajout": "2026-08-08",
+      "origine": "inventaire Phase 1"
+    },
+    {
+      "type": "CDC",
+      "objet": "Cahier des charges — ce qui est attendu, opposable",
+      "alias": [],
+      "premier_exemplaire": "Digit-AI - CDC Forge - Conception & PRD - 20260804a.md",
+      "date_ajout": "2026-08-08",
+      "origine": "inventaire Phase 1"
+    },
+    {
+      "type": "Cadrage",
+      "objet": "Périmètre, hypothèses et contraintes posés avant construction",
+      "alias": [],
+      "premier_exemplaire": null,
+      "date_ajout": "2026-08-08",
+      "origine": "inventaire Phase 1"
+    },
+    {
+      "type": "Conception",
+      "objet": "Options comparées et recommandation, avant toute construction",
+      "alias": [],
+      "premier_exemplaire": "Digit-AI - Conception Forge - Leviers de qualite generique - 20260808a.md",
+      "date_ajout": "2026-08-08",
+      "origine": "D-04, registre du 08/08"
+    },
+    {
+      "type": "Corpus",
+      "objet": "Matière rassemblée servant de source à un travail ultérieur",
+      "alias": [],
+      "premier_exemplaire": null,
+      "date_ajout": "2026-08-08",
+      "origine": "inventaire Phase 1"
+    },
+    {
+      "type": "Décisions",
+      "objet": "Arbitrages tracés, une entrée par décision, conflits résiduels déclarés",
+      "alias": ["Decisions"],
+      "premier_exemplaire": "Digit-AI - Decisions Forge - Conventions d'organisation - 20260808a.md",
+      "date_ajout": "2026-08-08",
+      "origine": "D-04, registre du 08/08"
+    },
+    {
+      "type": "Diagnostic",
+      "objet": "État des lieux d'une situation, orienté décision",
+      "alias": [],
+      "premier_exemplaire": "Diagnostic Stratégique IA - 20260722.png",
+      "date_ajout": "2026-08-08",
+      "origine": "inventaire Phase 1 — exemplaire divergent : sans indice (contre-exemple D-02)"
+    },
+    {
+      "type": "Étude",
+      "objet": "Résolution sourcée d'une question ouverte du corpus, avec test d'existence",
+      "alias": ["Etude"],
+      "premier_exemplaire": "Digit-AI - Etude Forge - Ingenierie des exigences P-10 - 20260808a.md",
+      "date_ajout": "2026-08-08",
+      "origine": "D-04, registre du 08/08"
+    },
+    {
+      "type": "Gabarit",
+      "objet": "Référentiel d'exigences A0 d'une famille de livrable",
+      "alias": [],
+      "premier_exemplaire": "Digit-AI - Gabarit Forge - A0 Page HTML de restitution - 20260808a.md",
+      "date_ajout": "2026-08-08",
+      "origine": "D-04, registre du 08/08"
+    },
+    {
+      "type": "Guide",
+      "objet": "Mode d'emploi destiné à un lecteur qui exécute",
+      "alias": ["Guide Admin"],
+      "premier_exemplaire": null,
+      "date_ajout": "2026-08-08",
+      "origine": "inventaire Phase 1"
+    },
+    {
+      "type": "Inventaire",
+      "objet": "Relevé factuel d'un existant, sans règle édictée, avec preuves de chemin",
+      "alias": [],
+      "premier_exemplaire": "Digit-AI - Inventaire Forge - Conventions d'organisation - 20260808a.md",
+      "date_ajout": "2026-08-08",
+      "origine": "inventaire Phase 1"
+    },
+    {
+      "type": "Maquette",
+      "objet": "Rendu d'interface non fonctionnel soumis à validation",
+      "alias": [],
+      "premier_exemplaire": null,
+      "date_ajout": "2026-08-08",
+      "origine": "inventaire Phase 1"
+    },
+    {
+      "type": "Modèle",
+      "objet": "Document vierge à instancier",
+      "alias": ["Modele"],
+      "premier_exemplaire": null,
+      "date_ajout": "2026-08-08",
+      "origine": "inventaire Phase 1"
+    },
+    {
+      "type": "Note",
+      "objet": "Écrit court sur un point précis, sans prétention d'exhaustivité",
+      "alias": [],
+      "premier_exemplaire": null,
+      "date_ajout": "2026-08-08",
+      "origine": "inventaire Phase 1"
+    },
+    {
+      "type": "PV",
+      "objet": "Procès-verbal — ce qui a été fait, constaté et décidé à une date",
+      "alias": [],
+      "premier_exemplaire": null,
+      "date_ajout": "2026-08-08",
+      "origine": "inventaire Phase 1"
+    },
+    {
+      "type": "Prompt",
+      "objet": "Consigne adressée à un modèle, versionnée comme un livrable",
+      "alias": [],
+      "premier_exemplaire": null,
+      "date_ajout": "2026-08-08",
+      "origine": "inventaire Phase 1"
+    },
+    {
+      "type": "Propale",
+      "objet": "Proposition commerciale chiffrée",
+      "alias": ["Propal"],
+      "premier_exemplaire": "Digit-AI - Propal ATB - Agents IA Run Support - 20260724a.pptx",
+      "date_ajout": "2026-08-08",
+      "origine": "inventaire Phase 1"
+    },
+    {
+      "type": "Runbook",
+      "objet": "Procédure d'exploitation, exécutable pas à pas",
+      "alias": [],
+      "premier_exemplaire": null,
+      "date_ajout": "2026-08-08",
+      "origine": "inventaire Phase 1"
+    },
+    {
+      "type": "Skill",
+      "objet": "Skill packagé et livré, versionné en plus d'être daté",
+      "alias": [],
+      "premier_exemplaire": "Digit-AI - Skill Forge - forge-agents v0.9.1 - 20260721b.zip",
+      "date_ajout": "2026-08-08",
+      "origine": "inventaire Phase 1"
+    },
+    {
+      "type": "Spec",
+      "objet": "Spécification d'un composant ou d'un contrat technique",
+      "alias": [],
+      "premier_exemplaire": "Digit-AI - Spec Forge - Noyau et contrat adaptateur - 20260802a.md",
+      "date_ajout": "2026-08-08",
+      "origine": "inventaire Phase 1"
+    },
+    {
+      "type": "Veille",
+      "objet": "Revue sourcée de l'état de l'art sur un sujet, datée",
+      "alias": [],
+      "premier_exemplaire": "Digit-AI - Veille Forge - Standards de rapport d'audit SEO - 20260808a.md",
+      "date_ajout": "2026-08-08",
+      "origine": "inventaire Phase 1"
+    }
+  ]
+}
