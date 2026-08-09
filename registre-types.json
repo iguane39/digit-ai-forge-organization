@@ -11,6 +11,14 @@
     "premier_exemplaire_null": "null = premier exemplaire non relevé par l'inventaire de Phase 1. Ce n'est pas une absence de type, c'est une absence de relevé.",
     "ajout_d_un_type": "Liste ouverte (D-04) : un type nouveau s'ajoute ici, avec son objet et son premier exemplaire, au lieu d'être improvisé dans un nom de fichier. L'ajout est un acte doctrinal — il se fait dans un commit qui le motive."
   },
+  "conventions": {
+    "_lecture": "Données que le vérificateur oracles/oracle-conventions.mjs lit ici plutôt que de les coder en dur : une convention qui change se corrige dans la doctrine, pas dans un script.",
+    "prefixes_emetteur": ["Digit-AI"],
+    "seuil_q3bis": "20260809",
+    "_seuil_q3bis": "Date à partir de laquelle le nom du projet prime sur l'émetteur (D-03). Avant ce seuil, un préfixe émetteur est un héritage : signalé, jamais bloquant — les fichiers historiques ne sont pas renommés (Q3).",
+    "types_doctrinaux": ["Décisions", "Gabarit"],
+    "_types_doctrinaux": "Types normatifs : ils vivent à la racine du dépôt avec leur Old/, jamais sous output/ (précision D-06 du 09/08)."
+  },
   "types": [
     {
       "type": "Architecture",
