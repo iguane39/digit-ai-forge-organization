@@ -1,8 +1,8 @@
 {
   "registre": "Types de documents — corpus Digit-AI",
   "decision_source": "D-04",
-  "version": "1.0.0",
-  "date_maj": "2026-08-09",
+  "version": "1.1.0",
+  "date_maj": "2026-08-11",
   "_lecture": {
     "role": "Source unique et machine-lisible des <Type> admis. D-04 promettait un référentiel tenu ; il n'existait qu'en tableau dans un document, donc ni interrogeable ni opposable à un vérificateur.",
     "gabarit_nom": "<Projet> - <Type> <Sujet> - AAAAMMJJ<indice>.<ext>",
@@ -13,10 +13,15 @@
   },
   "conventions": {
     "_lecture": "Données que le vérificateur oracles/oracle-conventions.mjs lit ici plutôt que de les coder en dur : une convention qui change se corrige dans la doctrine, pas dans un script.",
-    "prefixes_emetteur": ["Digit-AI"],
+    "prefixes_emetteur": [
+      "Digit-AI"
+    ],
     "seuil_q3bis": "20260809",
     "_seuil_q3bis": "Date à partir de laquelle le nom du projet prime sur l'émetteur (D-03). Avant ce seuil, un préfixe émetteur est un héritage : signalé, jamais bloquant — les fichiers historiques ne sont pas renommés (Q3).",
-    "types_doctrinaux": ["Décisions", "Gabarit"],
+    "types_doctrinaux": [
+      "Décisions",
+      "Gabarit"
+    ],
     "_types_doctrinaux": "Types normatifs : ils vivent à la racine du dépôt avec leur Old/, jamais sous output/ (précision D-06 du 09/08)."
   },
   "types": [
@@ -77,14 +82,6 @@
       "origine": "inventaire Phase 1"
     },
     {
-      "type": "Décisions",
-      "objet": "Arbitrages tracés, une entrée par décision, conflits résiduels déclarés",
-      "alias": ["Decisions"],
-      "premier_exemplaire": "Digit-AI - Decisions Forge - Conventions d'organisation - 20260808a.md",
-      "date_ajout": "2026-08-08",
-      "origine": "D-04, registre du 08/08"
-    },
-    {
       "type": "Diagnostic",
       "objet": "État des lieux d'une situation, orienté décision",
       "alias": [],
@@ -93,10 +90,20 @@
       "origine": "inventaire Phase 1 — exemplaire divergent : sans indice (contre-exemple D-02)"
     },
     {
-      "type": "Étude",
-      "objet": "Résolution sourcée d'une question ouverte du corpus, avec test d'existence",
-      "alias": ["Etude"],
-      "premier_exemplaire": "Digit-AI - Etude Forge - Ingenierie des exigences P-10 - 20260808a.md",
+      "type": "Dossier",
+      "objet": "Pièces rassemblées pour une décision (ex. dossier de MEP, R-16)",
+      "alias": [],
+      "premier_exemplaire": null,
+      "date_ajout": "2026-08-11",
+      "origine": "TF-0084 (pilot) — usage réel constaté au corpus ; Rapport/Dossier : sorties produit standard (R-16)"
+    },
+    {
+      "type": "Décisions",
+      "objet": "Arbitrages tracés, une entrée par décision, conflits résiduels déclarés",
+      "alias": [
+        "Decisions"
+      ],
+      "premier_exemplaire": "Digit-AI - Decisions Forge - Conventions d'organisation - 20260808a.md",
       "date_ajout": "2026-08-08",
       "origine": "D-04, registre du 08/08"
     },
@@ -111,7 +118,9 @@
     {
       "type": "Guide",
       "objet": "Mode d'emploi destiné à un lecteur qui exécute",
-      "alias": ["Guide Admin"],
+      "alias": [
+        "Guide Admin"
+      ],
       "premier_exemplaire": null,
       "date_ajout": "2026-08-08",
       "origine": "inventaire Phase 1"
@@ -135,7 +144,9 @@
     {
       "type": "Modèle",
       "objet": "Document vierge à instancier",
-      "alias": ["Modele"],
+      "alias": [
+        "Modele"
+      ],
       "premier_exemplaire": null,
       "date_ajout": "2026-08-08",
       "origine": "inventaire Phase 1"
@@ -157,6 +168,14 @@
       "origine": "inventaire Phase 1"
     },
     {
+      "type": "Page-Temoin",
+      "objet": "Page HTML de référence prouvant un socle de bonnes pratiques",
+      "alias": [],
+      "premier_exemplaire": "Digit-AI - Page-Temoin BestPractices - HTML - 20260810a.html",
+      "date_ajout": "2026-08-11",
+      "origine": "TF-0084 (pilot) — usage réel constaté au corpus ; Rapport/Dossier : sorties produit standard (R-16)"
+    },
+    {
       "type": "Prompt",
       "objet": "Consigne adressée à un modèle, versionnée comme un livrable",
       "alias": [],
@@ -167,10 +186,36 @@
     {
       "type": "Propale",
       "objet": "Proposition commerciale chiffrée",
-      "alias": ["Propal"],
+      "alias": [
+        "Propal"
+      ],
       "premier_exemplaire": "Digit-AI - Propal ATB - Agents IA Run Support - 20260724a.pptx",
       "date_ajout": "2026-08-08",
       "origine": "inventaire Phase 1"
+    },
+    {
+      "type": "Proposition",
+      "objet": "Option structurée soumise à décision humaine",
+      "alias": [],
+      "premier_exemplaire": "Digit-AI - Proposition Forge - Tuyauterie cognitive - 20260809a.md",
+      "date_ajout": "2026-08-11",
+      "origine": "TF-0084 (pilot) — usage réel constaté au corpus ; Rapport/Dossier : sorties produit standard (R-16)"
+    },
+    {
+      "type": "Rapport",
+      "objet": "Restitution structurée d'un travail vers son commanditaire",
+      "alias": [],
+      "premier_exemplaire": null,
+      "date_ajout": "2026-08-11",
+      "origine": "TF-0084 (pilot) — usage réel constaté au corpus ; Rapport/Dossier : sorties produit standard (R-16)"
+    },
+    {
+      "type": "Revue",
+      "objet": "Relecture critique d'un existant avec verdicts argumentés",
+      "alias": [],
+      "premier_exemplaire": "Digit-AI - Revue Forge - Écosystème - 20260808a.md",
+      "date_ajout": "2026-08-11",
+      "origine": "TF-0084 (pilot) — usage réel constaté au corpus ; Rapport/Dossier : sorties produit standard (R-16)"
     },
     {
       "type": "Runbook",
@@ -179,6 +224,14 @@
       "premier_exemplaire": null,
       "date_ajout": "2026-08-08",
       "origine": "inventaire Phase 1"
+    },
+    {
+      "type": "Schéma",
+      "objet": "Représentation visuelle d'une architecture ou d'un flux (HTML/PNG)",
+      "alias": [],
+      "premier_exemplaire": "Forge Pilot - Schéma Écosystème - 20260810a.png",
+      "date_ajout": "2026-08-11",
+      "origine": "TF-0084 (pilot) — usage réel constaté au corpus ; Rapport/Dossier : sorties produit standard (R-16)"
     },
     {
       "type": "Skill",
@@ -203,6 +256,16 @@
       "premier_exemplaire": "Digit-AI - Veille Forge - Standards de rapport d'audit SEO - 20260808a.md",
       "date_ajout": "2026-08-08",
       "origine": "inventaire Phase 1"
+    },
+    {
+      "type": "Étude",
+      "objet": "Résolution sourcée d'une question ouverte du corpus, avec test d'existence",
+      "alias": [
+        "Etude"
+      ],
+      "premier_exemplaire": "Digit-AI - Etude Forge - Ingenierie des exigences P-10 - 20260808a.md",
+      "date_ajout": "2026-08-08",
+      "origine": "D-04, registre du 08/08"
     }
   ]
 }
