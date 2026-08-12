@@ -1,0 +1,12 @@
+{
+  "registre": "registre minimal — fixtures de gate-conventions.mjs (TF-0109)",
+  "conventions": {
+    "prefixes_emetteur": ["Digit-AI"],
+    "seuil_q3bis": "20260809",
+    "types_doctrinaux": ["Décisions", "Gabarit"]
+  },
+  "types": [
+    { "type": "Note", "objet": "Écrit court", "alias": [] },
+    { "type": "Page-Temoin", "objet": "Page HTML de référence", "alias": [] }
+  ]
+}
