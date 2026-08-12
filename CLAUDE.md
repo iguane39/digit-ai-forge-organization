@@ -56,6 +56,7 @@ l'ancien nom maintient les chemins existants. Les documents produits à partir d
 |---|---|
 | **racine** | La **doctrine** : décisions, gabarits A0, `registre-types.json`. Normatif, versionné, jamais « en sortie ». |
 | `Old/` | Les versions antérieures de la doctrine. Déplacées, jamais supprimées (D-02). |
+| `decisions/` | D-01→D-12 au format [MADR](https://adr.github.io/madr/) — un fichier par décision, id stable, statut/contexte/décision/conséquences, texte d'origine conservé verbatim (TF-0109). Le document narratif ci-dessous reste la référence de lecture ; les MADR ajoutent la traçabilité (statut d'encodage corpus, verdict d'oracle). |
 | `input/` | Ce que l'humain fournit (D-06). |
 | `output/` | Ce qui **sort** : études, revues, composants livrés (D-01, D-06). Pas de doctrine ici. |
 | `oracles/` | Le vérificateur des conventions et ses fixtures. |
@@ -67,6 +68,7 @@ archive ses propres versions. C'est exactement le défaut corrigé le 2026-08-09
 
 - [`Forge Organization - Décisions Conventions d'organisation - 20260809a.md`](Forge%20Organization%20-%20D%C3%A9cisions%20Conventions%20d'organisation%20-%2020260809a.md)
   — les décisions D-01 à D-14 et les questions encore ouvertes. **Source de la doctrine.**
+  D-01 à D-12 renvoient chacune à leur MADR sous [`decisions/`](decisions/) (TF-0109).
 - [`registre-types.json`](registre-types.json) — les `<Type>` admis. Source unique ; ajouter un
   type se fait ici, dans un commit qui le motive, jamais dans un nom de fichier.
 - [`Digit-AI - Inventaire Forge - Conventions d'organisation - 20260808a.md`](Digit-AI%20-%20Inventaire%20Forge%20-%20Conventions%20d'organisation%20-%2020260808a.md)
@@ -79,7 +81,8 @@ archive ses propres versions. C'est exactement le défaut corrigé le 2026-08-09
 ## Vérifier
 
 ```bash
-# Conventions D-02 / D-03 / D-04 / D-06 sur le stock du dépôt
+# Conventions D-02/D-03/D-04/D-05/D-06/D-09/D-10 sur le stock du dépôt — D-01/D-07/D-08/D-11/
+# D-12 (non mécanisables) sortent en SANS_OBJET motivé, jamais tues (TF-0109)
 node oracles/oracle-conventions.mjs .
 node oracles/self-test.mjs          # fixtures verte et rouge — prouve que l'oracle peut échouer
 
