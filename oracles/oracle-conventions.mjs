@@ -1,17 +1,30 @@
 #!/usr/bin/env node
 // oracle-conventions — Phase 3 du chantier forge-organization.
 //
-// Vérifie mécaniquement, sur le stock d'un dépôt, les quatre décisions mécanisables :
+// Vérifie mécaniquement, sur le stock d'un dépôt, les décisions mécanisables :
 //   D-02  date ET indice alphabétique obligatoires ; une version antérieure vit dans Old/
 //   D-03  <Projet> - <Type> <Sujet> - AAAAMMJJ<indice>.<ext>, le projet en tête (Q3-bis)
 //   D-04  le <Type> appartient au registre (registre-types.json)
+//   D-05  CLAUDE.md est le point d'entrée — présent à la racine d'un dépôt (.git détecté)
 //   D-06  la doctrine vit à la racine, output/ ne porte que ce qui sort
+//   D-09  socle HTML minimal des livrables d'output/ : lang="fr", <meta viewport>, un seul
+//         <h1>, police Syne interdite (le reste du socle — contrastes, tokens :root — reste
+//         du ressort de digit-ai-page-html/check_html.py, non dupliqué ici)
+//   D-10  autonomie réseau des livrables HTML d'output/ : aucune ressource externe
+//         (http(s)://, //cdn, @import url()) — la décision elle-même qualifie ce contrôle
+//         d'« exécutable, pas déclaratif »
 //
-// Ce que l'oracle NE juge pas est déclaré dans non_juge[] : il ne devine pas si un fichier
-// non daté est un livrable ou un fichier de travail — cela suppose de lire.
+// TF-0109 (12/08) : les 8 décisions qui n'avaient AUCUN oracle (D-01, D-05, D-07→D-12) sont
+// désormais toutes traitées explicitement — soit mécanisées ci-dessus (D-05, D-09, D-10),
+// soit déclarées SANS_OBJET avec leur raison dans sans_objet[] (D-01, D-07, D-08, D-11, D-12).
+// Une décision absente des deux listes serait un oubli silencieux ; ce n'est plus permis.
 //
-// Contrat : JSON {oracle,domaine,artefact,verdict,findings[],non_juge[]} · exit 0 PASS,
-// 1 FAIL, 2 SKIP.
+// Ce que l'oracle NE juge pas dans son périmètre mécanisé est déclaré dans non_juge[] : il ne
+// devine pas si un fichier non daté est un livrable ou un fichier de travail — cela suppose
+// de lire.
+//
+// Contrat : JSON {oracle,domaine,artefact,verdict,findings[],non_juge[],sans_objet[]} ·
+// exit 0 PASS, 1 FAIL, 2 SKIP.
 //
 // Usage : node oracles/oracle-conventions.mjs <racine> [--json] [--registre <chemin>]
 
@@ -20,7 +33,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ICI = path.dirname(fileURLToPath(import.meta.url));
-const DOM = 'Conventions d\'organisation (D-02 / D-03 / D-04 / D-06)';
+const DOM = 'Conventions d\'organisation (D-02 / D-03 / D-04 / D-05 / D-06 / D-09 / D-10)';
 
 const NON_JUGE = [
   'les fichiers non datés — distinguer un livrable d\'un fichier de travail suppose de lire (D-02 ne s\'impose qu\'aux fichiers datés)',
@@ -29,6 +42,19 @@ const NON_JUGE = [
   'input/ : qu\'un entrant ait bien été fourni par l\'humain (D-06) ne se lit pas dans un nom',
   'le code, jamais daté (A6) — hors périmètre du nommage des livrables',
   'la pertinence du <Type> choisi : le registre dit qu\'il existe, pas qu\'il est le bon',
+  'D-05, le complément référencé depuis CLAUDE.md : seule la présence du fichier est vérifiée, pas le contenu du renvoi',
+  'D-09, le socle complet (contrastes WCAG, tokens :root, responsive) : délégué à digit-ai-page-html (check_html.py / render_page.py), non dupliqué ici',
+];
+
+// TF-0109 — les 8 décisions qui n'avaient aucun oracle avant ce jour. Celles qui ne sont pas
+// mécanisables par balayage de fichiers sont déclarées ici, avec leur raison : un « oubli »
+// silencieux n'est plus permis, une impossibilité documentée si.
+const SANS_OBJET = [
+  { regle: 'D-01', raison: 'output/ réservé aux livrables vs dist/ = artefact de build : distinguer les deux suppose de lire le CONTENU du dossier, pas son chemin — non mécanisable depuis un balayage de noms.' },
+  { regle: 'D-07', raison: 'artefacts de traçabilité (ledger.jsonl, sidecars, versions-livrees.json, registre-dette.json) déclarés « patron optionnel » : la décision consacre une liberté, pas une obligation — rien n\'est défini à faire échouer.' },
+  { regle: 'D-08', raison: 'décision de cadrage (Q1 : les trois axes HTML sont cumulatifs, pas alternatifs) : elle organise D-09/D-10/D-11, elle n\'introduit aucune règle propre à vérifier.' },
+  { regle: 'D-11', raison: 'HTML généré vs saisi à la main : le générateur d\'origine n\'est pas visible dans le fichier produit lui-même — non mécanisable sans métadonnée de provenance absente de la décision.' },
+  { regle: 'D-12', raison: 'composant partagé non installé, inliné avec provenance : suppose de connaître le catalogue des composants partagés et leur statut d\'installation dans d\'AUTRES dépôts — hors du balayage d\'un seul dépôt.' },
 ];
 
 const args = process.argv.slice(2);
@@ -48,6 +74,7 @@ function sortir(verdict, code) {
     verdict,
     findings,
     non_juge: NON_JUGE,
+    sans_objet: SANS_OBJET,
   };
   if (json) {
     process.stdout.write(JSON.stringify(rapport, null, 2));
@@ -61,6 +88,8 @@ function sortir(verdict, code) {
     const b = findings.filter((f) => f.sev === 'bloquant').length;
     const a = findings.filter((f) => f.sev === 'avertissement').length;
     process.stdout.write(`\n${verdict} — ${b} bloquant(s), ${a} avertissement(s).\n`);
+    process.stdout.write(`\nSANS_OBJET (${SANS_OBJET.length} décision(s) non mécanisable(s), déclarées plutôt qu'ignorées) :\n`);
+    for (const s of SANS_OBJET) process.stdout.write(`  · [${s.regle}] ${s.raison}\n`);
   }
   process.exit(code);
 }
@@ -97,6 +126,7 @@ const DOCTRINAUX = new Set(TYPES_DOCTRINAUX.map(pli));
 const IGNORE_DIR = new Set(['.git', 'node_modules', '__pycache__', '.venv', 'Old', 'old', 'fixtures']);
 const EST_SIDECAR = (n) => /\.oracles\.json$|\.oracles-cache\.json$|\.oracles-historique\.jsonl$/.test(n);
 
+const RACINE = path.resolve(racineArg);
 const fichiers = [];
 (function balaye(dir, rel) {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -107,7 +137,62 @@ const fichiers = [];
       fichiers.push({ nom: e.name, rel: rel ? `${rel}/${e.name}` : e.name, dossier: rel || '.' });
     }
   }
-})(path.resolve(racineArg), '');
+})(RACINE, '');
+
+// — D-05 — CLAUDE.md est le point d'entrée ————————————————————————————————————
+// Ne se juge qu'à la racine d'un DÉPÔT : appliqué à un sous-dossier arbitraire (une fixture,
+// par exemple), la question n'a pas de sens — d'où l'absence de marqueur dans les fixtures qui
+// ne testent pas D-05. Marqueur réel = `.git` (créé par git lui-même, jamais par un commit).
+// Marqueur de simulation = `.depot-fixture`, réservé aux fixtures de cet oracle : git refuse
+// structurellement de suivre tout chemin dont un segment s'appelle exactement `.git` (fichier
+// ou dossier — protection anti-corruption native, constatée ici en committant une fixture qui
+// tentait de le faire), donc une fixture ne peut pas committer de vrai `.git` pour se tester.
+if (fs.existsSync(path.join(RACINE, '.git')) || fs.existsSync(path.join(RACINE, '.depot-fixture'))) {
+  if (!fs.existsSync(path.join(RACINE, 'CLAUDE.md'))) {
+    ajoute('bloquant', 'D-05',
+      'CLAUDE.md absent à la racine du dépôt — il est le point d\'entrée des instructions projet (D-05) ; les compléments (ex. REGLES-PROJET.md) doivent y être référencés, pas orphelins',
+      '.');
+  }
+}
+
+// — D-09 / D-10 — livrables HTML d'output/ : socle minimal + autonomie réseau ————————
+// Portée volontairement étroite : D-09 délègue le gros du socle (contrastes, tokens :root,
+// responsive) à digit-ai-page-html/check_html.py — ici, seuls 4 marqueurs simples et non
+// ambigus, bon marché à vérifier en même temps que D-10 sur le même balayage de fichier.
+const HTML_OUTPUT = fichiers.filter((f) => f.dossier.split('/')[0] === 'output' && /\.html?$/i.test(f.nom));
+for (const f of HTML_OUTPUT) {
+  const abs = path.join(RACINE, f.rel);
+  let contenu;
+  try {
+    contenu = fs.readFileSync(abs, 'utf8');
+  } catch (e) {
+    ajoute('info', 'D-09', `illisible : ${e.message}`, f.rel);
+    continue;
+  }
+
+  // D-09 — marqueurs simples du socle
+  if (!/<html[^>]*\blang\s*=\s*["']fr["']/i.test(contenu)) {
+    ajoute('bloquant', 'D-09', 'balise <html> sans lang="fr" — socle digit-ai-page-html obligatoire pour tout livrable HTML sortant', f.rel);
+  }
+  if (!/<meta[^>]*\bname\s*=\s*["']viewport["']/i.test(contenu)) {
+    ajoute('bloquant', 'D-09', '<meta name="viewport"> absente — socle digit-ai-page-html obligatoire', f.rel);
+  }
+  const nbH1 = (contenu.match(/<h1[\s>]/gi) || []).length;
+  if (nbH1 !== 1) {
+    ajoute('bloquant', 'D-09', `${nbH1} <h1> trouvé(s), un seul est attendu — socle digit-ai-page-html obligatoire`, f.rel);
+  }
+  if (/syne/i.test(contenu)) {
+    ajoute('bloquant', 'D-09', 'police « Syne » référencée — explicitement interdite par D-09', f.rel);
+  }
+
+  // D-10 — autonomie réseau totale (hors attributs documentaires : commentaires HTML retirés
+  // avant balayage). La décision elle-même qualifie ce contrôle d'« exécutable, pas déclaratif ».
+  const sansCommentaires = contenu.replace(/<!--[\s\S]*?-->/g, '');
+  const motif = /https?:\/\/|\/\/cdn\b|@import\s+url\(/i.exec(sansCommentaires);
+  if (motif) {
+    ajoute('bloquant', 'D-10', `ressource externe détectée (« ${motif[0]} ») — un livrable HTML sortant est entièrement autonome (D-10), zéro requête réseau`, f.rel);
+  }
+}
 
 // Un fichier est « daté » dès qu'il porte une date AAAAMMJJ du siècle courant.
 const DATE_NUE = /(?:^|[^0-9])(20\d{6})(?![0-9])/;
