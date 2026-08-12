@@ -26,7 +26,15 @@ const CAS = [
   ['rouge-d03-prefixe-emetteur', { code: 1, bloquants: ['D-03'] }],
   ['rouge-d04-type-inconnu', { code: 1, bloquants: ['D-04'] }],
   ['rouge-d06-doctrine-en-sortie', { code: 1, bloquants: ['D-06'] }],
+  // TF-0109 — les 3 des 8 décisions orphelines qui se sont révélées mécanisables.
+  ['rouge-d05-claude-md-absent', { code: 1, bloquants: ['D-05'] }],
+  ['rouge-d09-marqueurs-manquants', { code: 1, bloquants: ['D-09'] }],
+  ['rouge-d10-reseau-externe', { code: 1, bloquants: ['D-10'] }],
 ];
+
+// TF-0109 — les 5 décisions non mécanisables doivent être déclarées SANS_OBJET avec leur
+// raison sur CHAQUE run, jamais tues. Un compte qui bouge est un oubli en train de naître.
+const REGLES_SANS_OBJET_ATTENDUES = ['D-01', 'D-07', 'D-08', 'D-11', 'D-12'];
 
 let echecs = 0;
 for (const [nom, attendu] of CAS) {
@@ -49,6 +57,14 @@ for (const [nom, attendu] of CAS) {
       ecarts.push(`règles bloquantes [${obtenus.join(', ') || '—'}], attendu [${veut.join(', ') || '—'}]`);
     }
     if (!rapport.non_juge.length) ecarts.push('non_juge[] vide — un oracle qui ne déclare pas ses angles morts en cache');
+
+    const regles_sans_objet = (rapport.sans_objet || []).map((s) => s.regle).sort();
+    if (regles_sans_objet.join(',') !== [...REGLES_SANS_OBJET_ATTENDUES].sort().join(',')) {
+      ecarts.push(`sans_objet[] = [${regles_sans_objet.join(', ') || '—'}], attendu [${REGLES_SANS_OBJET_ATTENDUES.join(', ')}] — une décision sans oracle ne doit ni disparaître ni se dupliquer`);
+    }
+    if ((rapport.sans_objet || []).some((s) => !s.raison || !s.raison.trim())) {
+      ecarts.push('sans_objet[] contient une entrée sans raison — un SANS_OBJET sans raison est un oubli déguisé');
+    }
   }
 
   if (ecarts.length) {

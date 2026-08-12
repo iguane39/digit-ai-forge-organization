@@ -1,0 +1,5 @@
+Marqueur de simulation (pas un vrai dépôt git) : prouve le cas conforme de D-05 (CLAUDE.md
+présent à la racine d'un dépôt) dans oracles/self-test.mjs (TF-0109). Un vrai dossier « .git »
+ne peut pas être committé ici — git refuse de suivre tout chemin dont un segment s'appelle
+exactement « .git », fichier ou dossier (protection anti-corruption native). Voir
+oracles/oracle-conventions.mjs (détection `.depot-fixture` en repli de `.git`).
