@@ -5,6 +5,13 @@ Décisions prises par Sébastien le 2026-08-08 sur les 7 divergences relevées e
 (voir `Digit-AI - Inventaire Forge - Conventions d'organisation - 20260808a.md`).
 Statut du document : **partiel** — 1 question de cadrage reste ouverte (§ Ouvertes).
 
+**TF-0109 (12/08)** : D-01 à D-12 sont désormais aussi au format [MADR](https://adr.github.io/madr/)
+sous [`decisions/`](decisions/) — un fichier par décision, id stable, statut/contexte/
+décision/conséquences, plus le statut d'encodage corpus (circuit D-13) et le verdict d'oracle
+(mécanisée ou `SANS_OBJET` motivé). **Ce document reste la doctrine narrative de référence** —
+les MADR n'en sont pas une réécriture, ils conservent le texte d'origine verbatim et
+n'ajoutent que la structure et la traçabilité. Chaque section ci-dessous renvoie à son MADR.
+
 **Historique des indices** (D-02 : la date *et* l'indice sont vérifiés à chaque génération —
 ce document ne s'en dispense pas) :
 - `20260808a` — arbitrages initiaux D-01 à D-07. Archivée dans `Old/`.
@@ -20,6 +27,8 @@ ce document ne s'en dispense pas) :
 
 ## D-01 — `output/` réservé aux livrables, pas aux artefacts de dev
 
+→ MADR : [`decisions/D-01.md`](decisions/D-01.md)
+
 **Décision** : `output/` contient les fichiers **en sortie** du projet. Il ne contient pas
 les artefacts de développement (build, compilation, packaging).
 **Conséquence** : `dist/` reste légitime pour un artefact de build — ce n'est pas un
@@ -29,6 +38,8 @@ contenu soit bien du build.
 **À vérifier avant mise en œuvre** : le contenu réel de ces deux `dist/` (build ou livrable ?).
 
 ## D-02 — Indice alphabétique obligatoire + archivage sans effacement
+
+→ MADR : [`decisions/D-02.md`](decisions/D-02.md)
 
 **Décision** : l'indice `a/b/c…` est **obligatoire**, y compris pour le premier fichier du
 jour (`20260808a`, jamais `20260808`). À chaque génération, la date **et** l'indice sont
@@ -42,6 +53,8 @@ jamais supprimées. L'historique est conservé.
 Les deux existent (`OptimAssur/old` vs `EnlargeAIChat/input/Old`).
 
 ## D-03 — Préfixe = nom du projet (Q3-bis tranchée)
+
+→ MADR : [`decisions/D-03.md`](decisions/D-03.md)
 
 **Décision** : le nom de fichier est préfixé par le nom du projet.
 **Gabarit** : `<Projet> - <Type> <Sujet> - AAAAMMJJ<indice>.<ext>`
@@ -66,6 +79,8 @@ et contrôlée par son oracle de conformité projet (cf. D-13).
 
 ## D-04 — Taxonomie des types : liste ouverte, registre tenu dans un fichier
 
+→ MADR : [`decisions/D-04.md`](decisions/D-04.md)
+
 **Décision** : la liste des `<Type>` reste ouverte, mais tout type nouveau est **ajouté au
 référentiel** au lieu d'être improvisé.
 
@@ -80,6 +95,8 @@ dans un nom de fichier.
 
 ## D-05 — `CLAUDE.md` point d'entrée, compléments admis
 
+→ MADR : [`decisions/D-05.md`](decisions/D-05.md)
+
 **Décision** : `CLAUDE.md` est le point d'entrée des instructions projet. D'autres fichiers
 peuvent le compléter.
 **Conséquence** : `digit-ai-forge-pilot/REGLES-PROJET.md` reste valide comme complément,
@@ -90,6 +107,8 @@ le présent document, `registre-types.json` et le vérificateur. Elle ne violait
 qu'elle édicte que faute d'avoir été écrite.
 
 ## D-06 — `input/` = ce que je fournis · `output/` = tout ce qui sort
+
+→ MADR : [`decisions/D-06.md`](decisions/D-06.md)
 
 **Décision** : `input/` contient les fichiers **fournis en entrée par l'utilisateur**.
 `output/` contient **tous les fichiers en sortie** (sous réserve de D-01 : hors artefacts
@@ -110,11 +129,15 @@ devient règle du corpus que par décision humaine au pilot (D-13).
 
 ## D-07 — Artefacts de traçabilité : patron optionnel
 
+→ MADR : [`decisions/D-07.md`](decisions/D-07.md)
+
 **Décision** : `ledger.jsonl`, sidecars `.oracles-historique.jsonl` / `.oracles-cache.json`,
 `versions-livrees.json`, `registre-dette.json` sont documentés comme **patron optionnel**,
 non comme obligation. Trop peu diffusés (1-2 occurrences chacun) pour être imposés.
 
 ## D-08 — Q1 : les trois axes sont trois décisions distinctes, toutes trois « oui »
+
+→ MADR : [`decisions/D-08.md`](decisions/D-08.md)
 
 **Contexte** : Q1 posait un choix entre trois lectures des « fichiers HTML ». C'est un faux
 choix — les trois sont nécessaires et indépendantes. Un fichier peut respecter la charte sans
@@ -129,6 +152,8 @@ HTML de la forge qui parte réellement chez un tiers.
 
 ## D-09 — Charte : socle `digit-ai-page-html` obligatoire
 
+→ MADR : [`decisions/D-09.md`](decisions/D-09.md)
+
 **Décision** : tout livrable HTML sortant applique le socle `digit-ai-page-html` — tokens
 `:root`, Roboto titres / DM Sans corps, thème clair, aucun hex en dur hors `:root`, WCAG 2.2 AA,
 `lang="fr"`, `<meta viewport>`, un `<h1>` unique, police Syne interdite.
@@ -141,6 +166,8 @@ SEO ajoute `--danger` et une échelle de niveau de preuve. Déclarés dans `:roo
 autres. Le socle est un plancher, pas un plafond.
 
 ## D-10 — Autonomie : totale, zéro requête réseau
+
+→ MADR : [`decisions/D-10.md`](decisions/D-10.md)
 
 **Décision** : un livrable HTML sortant est **entièrement autonome**. Aucun CDN, aucune police
 distante, aucune image externe, aucun appel réseau. CSS et JS inline, images en `data:` URI,
@@ -162,6 +189,8 @@ déclaratif.
 
 ## D-11 — Format : HTML pour le visuel sortant, Markdown pour la matière
 
+→ MADR : [`decisions/D-11.md`](decisions/D-11.md)
+
 **Décision** : le HTML est le format des livrables **visuels destinés à sortir du projet**. Le
 Markdown reste celui de la matière première et des documents de travail.
 
@@ -174,6 +203,8 @@ gabarit HTML qu'on remplit à la main est un anti-patron — il ne survit pas au
 diverge de sa source dès la première correction.
 
 ## D-12 — Composant partagé non installé : inliner, jamais installer en douce
+
+→ MADR : [`decisions/D-12.md`](decisions/D-12.md)
 
 **Décision** : un projet qui a besoin d'un composant du référentiel **avant son installation**
 en inline une copie verbatim, avec provenance et date, et **n'installe rien** dans un skill
