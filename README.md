@@ -1,8 +1,9 @@
 # digit-ai-forge-organization
 
 Chantier de doctrine transverse de l'écosystème forge Digit-AI : conventions observées,
-décisions D-01→D-12, études normatives. **Organization organise, pilot pilote** — elle
-propose, le pilot décide et encode.
+décisions D-01→D-12 et D-15 (D-13/D-14 encore au format narratif seul, MADR à venir),
+études normatives. **Organization organise, pilot pilote** — elle propose, le pilot décide
+et encode.
 
 ## Catalogue de services
 

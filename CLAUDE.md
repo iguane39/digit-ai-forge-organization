@@ -56,7 +56,7 @@ l'ancien nom maintient les chemins existants. Les documents produits à partir d
 |---|---|
 | **racine** | La **doctrine** : décisions, gabarits A0, `registre-types.json`. Normatif, versionné, jamais « en sortie ». |
 | `Old/` | Les versions antérieures de la doctrine. Déplacées, jamais supprimées (D-02). |
-| `decisions/` | D-01→D-12 au format [MADR](https://adr.github.io/madr/) — un fichier par décision, id stable, statut/contexte/décision/conséquences, texte d'origine conservé verbatim (TF-0109). Le document narratif ci-dessous reste la référence de lecture ; les MADR ajoutent la traçabilité (statut d'encodage corpus, verdict d'oracle). |
+| `decisions/` | D-01→D-12 et D-15 au format [MADR](https://adr.github.io/madr/) — un fichier par décision, id stable, statut/contexte/décision/conséquences, texte d'origine conservé verbatim quand il existe (TF-0109 ; D-15 n'en a pas, voir sa section « Origine »). D-13/D-14 restent au format narratif seul, MADR à venir. Le document narratif ci-dessous reste la référence de lecture pour D-01→D-14 ; les MADR ajoutent la traçabilité (statut d'encodage corpus, verdict d'oracle). |
 | `input/` | Ce que l'humain fournit (D-06). |
 | `output/` | Ce qui **sort** : études, revues, composants livrés (D-01, D-06). Pas de doctrine ici. |
 | `oracles/` | Le vérificateur des conventions et ses fixtures. |
