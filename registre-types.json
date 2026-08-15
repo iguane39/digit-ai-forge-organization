@@ -1,8 +1,8 @@
 {
   "registre": "Types de documents — corpus Digit-AI",
   "decision_source": "D-04",
-  "version": "1.1.0",
-  "date_maj": "2026-08-11",
+  "version": "1.2.0",
+  "date_maj": "2026-08-15",
   "_lecture": {
     "role": "Source unique et machine-lisible des <Type> admis. D-04 promettait un référentiel tenu ; il n'existait qu'en tableau dans un document, donc ni interrogeable ni opposable à un vérificateur.",
     "gabarit_nom": "<Projet> - <Type> <Sujet> - AAAAMMJJ<indice>.<ext>",
@@ -66,6 +66,14 @@
       "origine": "inventaire Phase 1"
     },
     {
+      "type": "Cahier",
+      "objet": "Recueil de cas de tests a executer, un cas par element de surface mesure",
+      "alias": [],
+      "premier_exemplaire": null,
+      "date_ajout": "2026-08-15",
+      "origine": "TF-0246 — type EMIS par un outil de la forge (`forge-tests --livrables`), admis plutot que renomme : le nom porte l'objet exact du livrable"
+    },
+    {
       "type": "Conception",
       "objet": "Options comparées et recommandation, avant toute construction",
       "alias": [],
@@ -80,6 +88,14 @@
       "premier_exemplaire": null,
       "date_ajout": "2026-08-08",
       "origine": "inventaire Phase 1"
+    },
+    {
+      "type": "Dashboard",
+      "objet": "Page HTML autonome restituant une mesure a l'ecran : compteurs, vues et detail par element",
+      "alias": [],
+      "premier_exemplaire": "bourse-aux-vacants - Dashboard tests - 20260813c.html",
+      "date_ajout": "2026-08-15",
+      "origine": "TF-0246 — type EMIS par un outil de la forge (`forge-tests --livrables`), admis plutot que renomme : le nom porte l'objet exact du livrable"
     },
     {
       "type": "Diagnostic",
@@ -132,6 +148,14 @@
       "premier_exemplaire": "Digit-AI - Inventaire Forge - Conventions d'organisation - 20260808a.md",
       "date_ajout": "2026-08-08",
       "origine": "inventaire Phase 1"
+    },
+    {
+      "type": "Jeu",
+      "objet": "Jeu de donnees synthetique alimentant l'execution des cas d'un cahier de tests",
+      "alias": [],
+      "premier_exemplaire": null,
+      "date_ajout": "2026-08-15",
+      "origine": "TF-0246 — type EMIS par un outil de la forge (`forge-tests --livrables`), admis plutot que renomme : le nom porte l'objet exact du livrable"
     },
     {
       "type": "Maquette",
