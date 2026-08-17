@@ -19,4 +19,4 @@ et encode.
 | **Gate de conventions packagé** | vérifier les conventions en pre-commit/CI sans dépendre de la forge | `node output\02-composants\gate-conventions\gate-conventions.mjs [--staged]` | prouvé (experimental) |
 
 Le catalogue consolidé des dix forges vit chez le pilot :
-[digit-ai-forge-pilot/catalogues/CATALOGUES.md](https://github.com/iguane39/digit-ai-forge-pilot/blob/main/catalogues/CATALOGUES.md).
+[digit-ai-factory/catalogues/CATALOGUES.md](https://github.com/iguane39/digit-ai-factory/blob/main/catalogues/CATALOGUES.md).
