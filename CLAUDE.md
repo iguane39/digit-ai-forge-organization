@@ -9,7 +9,7 @@ et **outille** leur vérification. Elle ne décrète rien pour le corpus.
 > **organization organise, le pilot pilote.**
 
 - **Ici** : on observe, on mesure, on propose, on écrit le vérificateur.
-- **`digit-ai-forge-pilot`** : il décide, encode la règle adoptée dans son `REGLES-PROJET.md`,
+- **`digit-ai-factory`** : il décide, encode la règle adoptée dans son `REGLES-PROJET.md`,
   et la fait respecter par son oracle de conformité projet.
 
 **Circuit d'une convention — sans raccourci :**
@@ -75,7 +75,7 @@ archive ses propres versions. C'est exactement le défaut corrigé le 2026-08-09
   — Phase 1, le relevé factuel sur 52 dossiers dont tout le reste est dérivé.
 - `Forge Organization - Gabarit A0 Page HTML de restitution - <date><indice>.md` — le
   référentiel d'exigences de fond de la famille « page HTML de restitution ».
-- Complément **hors de ce dépôt**, en lecture seule : `digit-ai-forge-pilot/REGLES-PROJET.md`
+- Complément **hors de ce dépôt**, en lecture seule : `digit-ai-factory/REGLES-PROJET.md`
   — les conventions *décidées*, celles qui sont opposables au corpus.
 
 ## Vérifier
