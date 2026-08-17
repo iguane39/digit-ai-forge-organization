@@ -50,6 +50,19 @@ douce » à un dépôt tiers.
 l'ancien nom maintient les chemins existants. Les documents produits à partir du 2026-08-09
 écrivent `forge-pilot` ; les documents antérieurs ne sont pas réécrits.
 
+## Le dépôt pilot s'appelle `digit-ai-factory` (2026-08-17)
+
+Second renommage, qui **remplace** le nom courant fixé par la section ci-dessus sans la
+réécrire : `digit-ai-forge-pilot` est devenu `digit-ai-factory` (dépôt GitHub renommé le
+2026-08-17, les anciens URL redirigent — l'ancien nom ne sera jamais réutilisé, sa réutilisation
+casserait définitivement les redirections). Aucune jonction de compatibilité : le nom du dossier
+local suit celui du dépôt. Le pilot est désormais la **seule exception nommée** au motif
+`digit-ai-forge-*` des treize forges. Décision, contexte et conséquences :
+[`decisions/D-17.md`](decisions/D-17.md). Les documents produits à partir du 2026-08-17 écrivent
+`digit-ai-factory` ; les documents antérieurs ne sont pas réécrits (Q3). Le mot « pilot » comme
+**rôle** est hors périmètre du renommage par décision explicite : « organization organise, le
+pilot pilote » reste vrai mot pour mot.
+
 ## Où vivent les choses
 
 | Emplacement | Contenu |
