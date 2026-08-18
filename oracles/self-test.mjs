@@ -30,6 +30,11 @@ const CAS = [
   ['rouge-d05-claude-md-absent', { code: 1, bloquants: ['D-05'] }],
   ['rouge-d09-marqueurs-manquants', { code: 1, bloquants: ['D-09'] }],
   ['rouge-d10-reseau-externe', { code: 1, bloquants: ['D-10'] }],
+  // TF-0377 / D-18 — deux sens, et le second n'est PAS bloquant : sans la vérification des
+  // avertissements ajoutée plus bas, « rouge-d18-nom-muet » serait indistinguable de la
+  // fixture verte, et le sens faible du contrôle pourrait disparaître sans que rien ne bouge.
+  ['rouge-d18-version-divergente', { code: 1, bloquants: ['D-18'], avertissements: [] }],
+  ['rouge-d18-nom-muet', { code: 0, bloquants: [], avertissements: ['D-18'] }],
 ];
 
 // TF-0109 — les 5 décisions non mécanisables doivent être déclarées SANS_OBJET avec leur
@@ -55,6 +60,16 @@ for (const [nom, attendu] of CAS) {
     const veut = [...attendu.bloquants].sort();
     if (obtenus.join(',') !== veut.join(',')) {
       ecarts.push(`règles bloquantes [${obtenus.join(', ') || '—'}], attendu [${veut.join(', ') || '—'}]`);
+    }
+    // Les avertissements ne sont vérifiés que là où la fixture en DÉCLARE l'attente : les
+    // fixtures antérieures à D-18 ne s'en occupent pas, et les leur imposer ferait échouer
+    // des cas justes. Là où l'attente est déclarée, l'ensemble est EXACT — ni moins, ni plus.
+    if (attendu.avertissements) {
+      const av = [...new Set(rapport.findings.filter((f) => f.sev === 'avertissement').map((f) => f.regle))].sort();
+      const veutAv = [...attendu.avertissements].sort();
+      if (av.join(',') !== veutAv.join(',')) {
+        ecarts.push(`avertissements [${av.join(', ') || '—'}], attendu [${veutAv.join(', ') || '—'}]`);
+      }
     }
     if (!rapport.non_juge.length) ecarts.push('non_juge[] vide — un oracle qui ne déclare pas ses angles morts en cache');
 
