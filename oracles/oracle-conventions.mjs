@@ -10,6 +10,9 @@
 //   D-09  socle HTML minimal des livrables d'output/ : lang="fr", <meta viewport>, un seul
 //         <h1>, police Syne interdite (le reste du socle — contrastes, tokens :root — reste
 //         du ressort de digit-ai-page-html/check_html.py, non dupliqué ici)
+//   D-18  la version au NOM d'un artefact versionné est celle de son CONTENU (TF-0377) —
+//         bloquant dans le sens qui a coûté (le nom promet, le contenu ne porte pas),
+//         avertissement dans le sens inverse (le contenu se déclare, le nom se taît)
 //   D-10  autonomie réseau des livrables HTML d'output/ : aucune ressource externe
 //         (http(s)://, //cdn, @import url()) — la décision elle-même qualifie ce contrôle
 //         d'« exécutable, pas déclaratif »
@@ -33,7 +36,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ICI = path.dirname(fileURLToPath(import.meta.url));
-const DOM = 'Conventions d\'organisation (D-02 / D-03 / D-04 / D-05 / D-06 / D-09 / D-10)';
+const DOM = 'Conventions d\'organisation (D-02 / D-03 / D-04 / D-05 / D-06 / D-09 / D-10 / D-18)';
 
 const NON_JUGE = [
   'les fichiers non datés — distinguer un livrable d\'un fichier de travail suppose de lire (D-02 ne s\'impose qu\'aux fichiers datés)',
@@ -43,6 +46,9 @@ const NON_JUGE = [
   'le code, jamais daté (A6) — hors périmètre du nommage des livrables',
   'la pertinence du <Type> choisi : le registre dit qu\'il existe, pas qu\'il est le bon',
   'D-05, le complément référencé depuis CLAUDE.md : seule la présence du fichier est vérifiée, pas le contenu du renvoi',
+  'D-18 ne dit pas LAQUELLE des deux versions est la bonne : trancher un V1.3 contre un V1.4 est un arbitrage humain — l\'oracle pose la question, il ne répond pas',
+  'D-18, sens « le contenu se déclare, le nom se taît » : cherché UNIQUEMENT en tête et en pied de document (900 premiers et derniers caractères) et seulement quand le marqueur se désigne lui-même (« version » à proximité). Une version citée dans le corps ne déclenche rien — citer n\'est pas se déclarer, et le contrôle élargi serait si bruyant qu\'on cesserait de le lire',
+  'D-18 : un nom qui ne porte AUCUNE version et un contenu qui n\'en déclare aucune sortent du périmètre — il n\'y a alors rien à confronter, et l\'inventer serait pire',
   'D-09, le socle complet (contrastes WCAG, tokens :root, responsive) : délégué à digit-ai-page-html (check_html.py / render_page.py), non dupliqué ici',
 ];
 
@@ -191,6 +197,91 @@ for (const f of HTML_OUTPUT) {
   const motif = /https?:\/\/|\/\/cdn\b|@import\s+url\(/i.exec(sansCommentaires);
   if (motif) {
     ajoute('bloquant', 'D-10', `ressource externe détectée (« ${motif[0]} ») — un livrable HTML sortant est entièrement autonome (D-10), zéro requête réseau`, f.rel);
+  }
+}
+
+// — D-18 — la version au NOM est la version dans le CONTENU (TF-0377) ————————————————
+// Le fait : `Approval-cahier-des-charges-V1.4.html` portait « V1.3 » en en-tête ET en pied,
+// et un lot de corrections déclarait primer sur « le cahier V1.3 ». Lu vite, cela faisait DEUX
+// référentiels dont un seul arbitré — l'ambiguïté a été portée à l'humain comme un risque de
+// ROUVRIR 31 écarts fermés la nuit précédente, et n'a été levée que par la lecture du pied de
+// page. Un arbitrage faux évité par une lecture manuelle, pas par un contrôle.
+//
+// DEUX SENS, et l'asymétrie est voulue :
+//   · le nom promet une version que le contenu ne porte NULLE PART → bloquant. C'est le sens
+//     qui a coûté, et le seul où l'écart est certain.
+//   · le contenu se déclare en tête ou en pied, le nom se taît → avertissement. Il oblige à
+//     ouvrir le fichier pour savoir ce qu'on lit — le geste même qui a sauvé la mise.
+// Et un document qui CITE la version d'un autre artefact ne déclenche rien : c'est pourquoi le
+// second sens est ancré en tête/pied ET exige que le marqueur se désigne lui-même. Un contrôle
+// qui accuserait toute mention de version serait si bruyant qu'on cesserait de le lire.
+//
+// Le contenu peut porter PLUS de versions que le nom (« remplace V1.2 ») : ce n'est pas un
+// écart. On vérifie que la version du nom EST LÀ, jamais qu'elle est seule.
+const RE_VERSION_NOM = /(?:^|[^0-9A-Za-z])[Vv](\d+(?:[.\-]\d+)*)(?![0-9A-Za-z])/;
+// Un jeton de version est `V<n>` collé (V1.4, V2), ou la forme explicite « version 1.4 » dont
+// le numéro est MULTI-PARTIE. Cette seconde condition n'est pas un détail : sans elle,
+// « Version 29 mai 2026 » — l'en-tête exact du cahier Approval — se lit « version 29 », et le
+// contrôle accuse un écart qui n'existe pas. Défaut trouvé sur ma propre première écriture.
+const RE_VERSION_COLLEE = /(?:^|[^0-9A-Za-z])[Vv](\d+(?:[.\-]\d+)*)(?![0-9A-Za-z])/g;
+const RE_VERSION_EXPLICITE = /version\s+v?(\d+[.\-]\d+(?:[.\-]\d+)*)(?![0-9A-Za-z])/gi;
+const versionsDuTexte = (t) => [
+  ...[...t.matchAll(RE_VERSION_COLLEE)].map((m) => m[1]),
+  ...[...t.matchAll(RE_VERSION_EXPLICITE)].map((m) => m[1]),
+];
+const ANCRE = 900;
+const VERSIONNABLES = fichiers.filter((f) => /\.(html?|md|markdown)$/i.test(f.nom));
+
+const memeVersion = (a, b) => a.replace(/-/g, '.') === b.replace(/-/g, '.');
+
+for (const f of VERSIONNABLES) {
+  let brut;
+  try {
+    brut = fs.readFileSync(path.join(RACINE, f.rel), 'utf8');
+  } catch (e) {
+    ajoute('info', 'D-18', `illisible : ${e.message}`, f.rel);
+    continue;
+  }
+  // Le texte, pas le balisage : `<div class="v2">` n'est pas une déclaration de version.
+  const texte = brut.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<[^>]+>/g, ' ');
+  const versionsTexte = versionsDuTexte(texte);
+  const auNom = RE_VERSION_NOM.exec(f.nom.replace(/\.[A-Za-z0-9]+$/, ''));
+
+  if (auNom) {
+    if (!versionsTexte.length) {
+      ajoute('avertissement', 'D-18',
+        `le nom annonce la version ${auNom[1]} et le contenu n'en déclare AUCUNE — rien à confronter, donc rien de prouvé : le lecteur croit le nom sur parole`,
+        f.rel);
+    } else if (!versionsTexte.some((v) => memeVersion(v, auNom[1]))) {
+      ajoute('bloquant', 'D-18',
+        `le nom annonce la version ${auNom[1]}, le contenu ne la porte nulle part (versions trouvées : ${[...new Set(versionsTexte)].join(', ')}) — D-18 : deux versions apparentes font croire à deux référentiels, et un seul arbitré`,
+        f.rel);
+    }
+    continue;
+  }
+
+  // Sens inverse, ANCRÉ : seules les déclarations de tête et de pied comptent, et seulement
+  // si le marqueur se désigne lui-même. Le corps du document est hors périmètre par dessein.
+  const bords = texte.slice(0, ANCRE) + ' … ' + texte.slice(-ANCRE);
+  // MESURÉ AVANT DE GARDER : la première écriture cherchait « version » à 40 caractères d'un
+  // jeton dans les 900 premiers/derniers caractères. Résultat sur trois dépôts réels : 6
+  // avertissements, tous faux — « les versions des forges utilisées », « redémarrage de la
+  // version N-1 taguée ». Un contrôle à ce taux de bruit ne se corrige pas, il se fait ignorer
+  // (R-33 bis). Donc la déclaration doit être STRUCTURELLE : une ligne qui COMMENCE par
+  // « version », un `version:` de frontmatter, ou la formule « version arbitrée » — ce sont
+  // exactement les trois formes où un document se désigne lui-même, et les deux premières
+  // suffisaient à lever l'ambiguïté du 18/08.
+  const LIGNE_QUI_SE_DECLARE = /^\s*(?:version\b|version\s*:)|version\s+arbitr/i;
+  let propre = null;
+  for (const ligne of bords.split(/[\r\n]+/)) {
+    if (!LIGNE_QUI_SE_DECLARE.test(ligne)) continue;
+    const jetons = versionsDuTexte(ligne);
+    if (jetons.length) { propre = jetons[0]; break; }
+  }
+  if (propre) {
+    ajoute('avertissement', 'D-18',
+      `le document déclare sa version (${propre}) en tête ou en pied, son nom n'en dit rien — il faut l'ouvrir pour savoir ce qu'on lit, et c'est ce geste qui a évité un arbitrage faux le 18/08`,
+      f.rel);
   }
 }
 
