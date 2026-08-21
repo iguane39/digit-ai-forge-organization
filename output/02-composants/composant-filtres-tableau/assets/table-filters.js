@@ -1,11 +1,16 @@
 /* Digit-AI — Filtres de colonne sur tableaux de données.
    Socle commun : voir references/composant-filtres-tableau.md (checklist G1-G6).
    Viewer-only : le JS ne s'exécute pas à l'export WeasyPrint, la regle @media print
-   du livrable doit reafficher tr[data-tf-hidden]. */
+   du livrable doit reafficher tr[data-tf-hidden].
+   Lot Hoopiz 20260820b (TF-0429/0430/0431, 21/08) : rappel apresFiltrage et instance
+   enveloppable, etat vide avec « tout reafficher », panneau qui choisit son cote et
+   neutralise le rognage de son conteneur defilant tant qu'il est ouvert. */
 (function (root) {
   'use strict';
 
   var SEUIL_LIGNES = 8;
+  var LIBELLE_VIDE = 'Aucune ligne ne correspond aux filtres.';
+  var LIBELLE_TOUT = 'Tout réafficher';
 
   function norm(s) {
     return String(s == null ? '' : s)
@@ -14,12 +19,25 @@
 
   function corps(table) {
     var tb = table.tBodies && table.tBodies[0];
-    return tb ? Array.prototype.slice.call(tb.rows) : [];
+    /* TF-0175 : une ligne [data-detail] est le DÉPLIANT pleine largeur de la ligne qui la
+       précède — elle ne porte pas de données de colonnes et ne compte ni ne se filtre.
+       TF-0430 : la ligne d'état vide [data-tf-empty] est un message du composant, pas une donnée. */
+    return tb ? Array.prototype.slice.call(tb.rows).filter(function (tr) {
+      return !tr.hasAttribute('data-detail') && !tr.hasAttribute('data-tf-empty');
+    }) : [];
   }
 
   function valeur(tr, i) {
     var td = tr.cells[i];
     return td ? td.textContent.trim() : '';
+  }
+
+  function nbColonnes(table) {
+    var ths = table.tHead ? Array.prototype.slice.call(table.tHead.rows[0].cells) : [];
+    var n = 0;
+    ths.forEach(function (th) { n += th.colSpan || 1; });
+    if (!n) { var l = corps(table)[0]; n = l ? l.cells.length : 1; }
+    return n;
   }
 
   /* Une colonne est categorielle si ses valeurs se repetent : cardinalite < nb lignes.
@@ -47,7 +65,7 @@
     b.setAttribute('aria-expanded', 'false');
     b.setAttribute('aria-controls', id);
     b.setAttribute('aria-label', 'Filtrer ' + col.th.textContent.trim());
-    b.textContent = '▾';
+    b.textContent = '›';               /* chevron simple (TF-0435) : present dans toute pile de repli */
     return b;
   }
 
@@ -91,9 +109,70 @@
     return { panneau: p, recherche: rech, tous: tous, aucun: aucun, options: opts };
   }
 
-  function init(table) {
+  /* TF-0431 : le conteneur defilant le plus proche (overflow-x auto|scroll) rogne un panneau
+     absolu et gagne un ascenseur horizontal des qu'il s'ouvre. Tant qu'un panneau est ouvert,
+     son rognage est neutralise ; a la fermeture, l'etat inline d'origine est retabli. */
+  function conteneurDefilant(el) {
+    var p = el.parentElement;
+    while (p && p !== document.body) {
+      var o = getComputedStyle(p).overflowX;
+      if (o === 'auto' || o === 'scroll') return p;
+      p = p.parentElement;
+    }
+    return null;
+  }
+
+  /* RA-5 (14/08) : tri OPT-IN — la règle L4 exige « filtre, tri et recherche », le composant
+     fournit désormais le tri sur demande : init(table, { tri: true }). Défaut false : aucun
+     changement pour les pages qui ont déjà leur tri. Les clics sur .tf-btn/.tf-panel sont
+     ignorés, les lignes [data-detail] voyagent avec leur ligne mère. */
+  function armerTri(table) {
+    var ths = table.tHead ? Array.prototype.slice.call(table.tHead.rows[0].cells) : [];
+    corps(table).forEach(function (tr) {
+      var d = tr.nextElementSibling;
+      tr.__tfDetail = (d && d.hasAttribute('data-detail')) ? d : null;
+    });
+    ths.forEach(function (th, i) {
+      if (!th.style.cursor) th.style.cursor = 'pointer';
+      th.addEventListener('click', function (ev) {
+        if (ev.target.closest && ev.target.closest('.tf-btn, .tf-panel')) return;
+        var sens = th.getAttribute('aria-sort') === 'ascending' ? -1 : 1;
+        ths.forEach(function (t) {
+          t.removeAttribute('aria-sort');
+          var m = t.querySelector('.tf-tri'); if (m) m.remove();
+        });
+        th.setAttribute('aria-sort', sens === 1 ? 'ascending' : 'descending');
+        var marque = document.createElement('span');
+        marque.className = 'tf-tri';
+        marque.textContent = sens === 1 ? ' ↑' : ' ↓';
+        th.appendChild(marque);
+        var tb = table.tBodies[0];
+        var tris = corps(table).slice();
+        tris.sort(function (a, b) {
+          var va = valeur(a, i), vb = valeur(b, i);
+          var na = parseFloat(String(va).replace(',', '.').replace('%', ''));
+          var nb = parseFloat(String(vb).replace(',', '.').replace('%', ''));
+          if (!isNaN(na) && !isNaN(nb)) return (na - nb) * sens;
+          return norm(va) < norm(vb) ? -sens : (norm(va) > norm(vb) ? sens : 0);
+        });
+        tris.forEach(function (tr) {
+          tb.appendChild(tr);
+          if (tr.__tfDetail) tb.appendChild(tr.__tfDetail);
+        });
+      });
+    });
+  }
+
+  /* init(table, opts) — opts.tri (bool) · opts.apresFiltrage(table, visibles, total) : rappel
+     appele a la fin de CHAQUE filtrage, y compris ceux declenches par les cases, Tous/Aucun et
+     la recherche (TF-0429 : avant, seul l'appel manuel a instance.appliquer etait observable,
+     envelopper l'instance etait silencieusement sans effet). Les gestionnaires internes passent
+     par api.appliquer : remplacer instance.appliquer est desormais honore. */
+  function init(table, opts) {
+    opts = opts || {};
     if (!table || table.getAttribute('data-tf-ready') === '1') return null;
     if (table.getAttribute('data-filterable') === 'off') return null;
+    if (opts.tri) armerTri(table);
 
     var lignes = corps(table);
     var cols = colonnesFiltrables(table, lignes);
@@ -103,6 +182,43 @@
     table.id = id;
     var compteur = document.querySelector('[data-tf-count-for="' + id + '"]');
     var etats = [];
+    var api = {};
+    var defilant = conteneurDefilant(table);
+    var overflowOrigine = null;
+
+    /* TF-0430 : etat vide — une ligne de message pleine largeur et la seule action utile a ce
+       moment, « tout reafficher ». Libelle surchargeable par data-tf-vide sur la table. */
+    function ligneVide() {
+      var tb = table.tBodies[0];
+      var tr = tb.querySelector('tr[data-tf-empty]');
+      if (tr) return tr;
+      tr = document.createElement('tr');
+      tr.setAttribute('data-tf-empty', '');
+      tr.className = 'tf-vide';
+      var td = document.createElement('td');
+      td.colSpan = nbColonnes(table);
+      var msg = document.createElement('span');
+      msg.className = 'tf-vide-msg';
+      msg.textContent = table.getAttribute('data-tf-vide') || LIBELLE_VIDE;
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'tf-reset';
+      b.textContent = LIBELLE_TOUT;
+      b.addEventListener('click', function () { toutReafficher(); });
+      td.appendChild(msg); td.appendChild(document.createTextNode(' ')); td.appendChild(b);
+      tr.appendChild(td);
+      tb.appendChild(tr);
+      return tr;
+    }
+
+    function toutReafficher() {
+      etats.forEach(function (e) {
+        Object.keys(e.selection).forEach(function (k) { e.selection[k] = true; });
+        var p = document.getElementById(e.bouton.getAttribute('aria-controls'));
+        if (p) Array.prototype.forEach.call(p.querySelectorAll('.tf-opt'), function (cb) { cb.checked = true; });
+      });
+      api.appliquer();
+    }
 
     function appliquer() {
       var visibles = 0;
@@ -111,7 +227,12 @@
           return e.selection[valeur(tr, e.col.index)] === true;
         });
         if (ok) { tr.removeAttribute('data-tf-hidden'); tr.style.display = ''; visibles++; }
-        else { tr.setAttribute('data-tf-hidden', ''); tr.style.display = 'none'; }
+        else {
+          tr.setAttribute('data-tf-hidden', ''); tr.style.display = 'none';
+          /* la ligne de détail suit le sort de sa ligne mère : masquée ET repliée */
+          var det = tr.nextElementSibling;
+          if (det && det.hasAttribute('data-detail')) { det.hidden = true; }
+        }
       });
       etats.forEach(function (e) {
         var actif = Object.keys(e.selection).some(function (k) { return !e.selection[k]; });
@@ -121,6 +242,25 @@
         compteur.textContent = visibles + ' ligne' + (visibles > 1 ? 's' : '') +
           ' sur ' + lignes.length;
         compteur.classList.toggle('zero', visibles === 0);
+      }
+      var vide = table.tBodies[0].querySelector('tr[data-tf-empty]');
+      if (visibles === 0 && lignes.length) { ligneVide().hidden = false; }
+      else if (vide) { vide.hidden = true; }
+      if (typeof opts.apresFiltrage === 'function') opts.apresFiltrage(table, visibles, lignes.length);
+    }
+
+    function placer(b, p) {
+      /* TF-0431 : cote d'ouverture selon la place mesuree — a droite du bouton par defaut,
+         aligne sur le bord droit quand le panneau sortirait de la fenetre ou du conteneur. */
+      p.classList.remove('tf-droite');
+      var limite = defilant ? defilant.getBoundingClientRect().right : (window.innerWidth || document.documentElement.clientWidth);
+      var r = b.getBoundingClientRect();
+      var largeur = p.offsetWidth || 240;
+      if (r.left + largeur > limite - 8) p.classList.add('tf-droite');
+      if (defilant && overflowOrigine === null) {
+        overflowOrigine = defilant.style.overflow || '';
+        defilant.setAttribute('data-tf-ouvert', '');
+        defilant.style.overflow = 'visible';
       }
     }
 
@@ -140,7 +280,11 @@
       b.addEventListener('click', function () {
         var ouvert = b.getAttribute('aria-expanded') === 'true';
         fermerTout();
-        if (!ouvert) { b.setAttribute('aria-expanded', 'true'); ui.panneau.hidden = false; ui.recherche.focus(); }
+        if (!ouvert) {
+          b.setAttribute('aria-expanded', 'true'); ui.panneau.hidden = false;
+          placer(b, ui.panneau);
+          ui.recherche.focus();
+        }
       });
 
       ui.recherche.addEventListener('input', function () {
@@ -158,7 +302,7 @@
           cb.checked = valeurCible;
           selection[cb.value] = valeurCible;
         });
-        appliquer();
+        api.appliquer();
       }
       ui.tous.addEventListener('click', function () { masse(true); });
       ui.aucun.addEventListener('click', function () { masse(false); });
@@ -167,7 +311,7 @@
         var cb = ev.target;
         if (!cb.classList.contains('tf-opt')) return;
         selection[cb.value] = cb.checked;
-        appliquer();
+        api.appliquer();
       });
 
       ui.panneau.addEventListener('keydown', function (ev) {
@@ -179,8 +323,13 @@
       etats.forEach(function (e) {
         e.bouton.setAttribute('aria-expanded', 'false');
         var p = document.getElementById(e.bouton.getAttribute('aria-controls'));
-        if (p) p.hidden = true;
+        if (p) { p.hidden = true; p.classList.remove('tf-droite'); }
       });
+      if (defilant && overflowOrigine !== null) {
+        defilant.style.overflow = overflowOrigine;
+        defilant.removeAttribute('data-tf-ouvert');
+        overflowOrigine = null;
+      }
     }
 
     document.addEventListener('click', function (ev) {
@@ -188,15 +337,18 @@
     });
 
     table.setAttribute('data-tf-ready', '1');
-    appliquer();
-    return { appliquer: appliquer, fermerTout: fermerTout };
+    api.appliquer = appliquer;
+    api.fermerTout = fermerTout;
+    api.toutReafficher = toutReafficher;
+    api.appliquer();
+    return api;
   }
 
-  function initAll(racine) {
+  function initAll(racine, opts) {
     var scope = racine || document;
     return Array.prototype.map.call(
       scope.querySelectorAll('table[data-filterable]'),
-      function (t) { return init(t); }
+      function (t) { return init(t, opts); }
     );
   }
 

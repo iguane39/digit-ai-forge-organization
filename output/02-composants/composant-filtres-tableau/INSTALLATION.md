@@ -4,6 +4,13 @@
 touche deux skills en production (`digit-ai-page-html`, `quality-oracles`) et attend un
 accord explicite.
 
+> **Source de vérité depuis le 21/08 (lot Hoopiz, TF-0429/0430/0431).** Le composant a évolué
+> DANS le skill `digit-ai-page-html` (TF-0175 lignes de détail, RA-5 tri opt-in, puis
+> `apresFiltrage`, état vide, côté d'ouverture) pendant que cette copie restait au 09/08 : les
+> deux divergeaient de 460 lignes. La copie du skill est la source qui s'exécute ; `assets/`
+> ici est **re-synchronisé depuis le skill** (js + css) et le restera à chaque évolution —
+> la checklist G1-G6 et l'oracle, eux, vivent ici.
+
 ## Destination des fichiers
 
 | Fichier produit | Destination |
