@@ -1,0 +1,8 @@
+/* Asset externe de demonstration — RS-1 bis (TF-0837) : reference par
+   <link rel="stylesheet" href="/assets/print.css?v=3">, forme racine-relative AVEC suffixe
+   de cache. La regle de reaffichage a l'impression vit ICI, jamais dans un <style> du
+   document audite. */
+@media print {
+  .tf-btn, .tf-panel { display:none !important; }
+  tr[data-tf-hidden] { display:table-row !important; }
+}

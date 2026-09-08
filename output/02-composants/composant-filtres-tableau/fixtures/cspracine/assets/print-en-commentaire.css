@@ -1,0 +1,7 @@
+/* Asset externe de demonstration, sens ROUGE — RS-1 bis (TF-0837). Ce fichier EXISTE et il est
+   resolu par la remontee. Il DECRIT la regle attendue — @media print doit reafficher
+   tr[data-tf-hidden] — sans la porter. G6 doit rester bloquant : un PDF exporte apres filtrage
+   sortirait tronque, et un commentaire n'a jamais reaffiche une ligne. */
+@media print {
+  .tf-btn, .tf-panel { display:none !important; }
+}

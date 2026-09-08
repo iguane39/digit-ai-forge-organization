@@ -110,6 +110,18 @@ seule présence de la référence ne suffit jamais : le fichier doit exister et 
 réellement le motif, hors de tout commentaire (voir `fixtures/filtres-rouge-cspexterne.html`
 et `fixtures/filtres-verte-cspexterne.html`).
 
+**RS-1 bis (TF-0837, 08/09)** : deux formes de référence qu'emploie ordinairement une
+application **servie** échappaient encore à RS-1, avec exactement l'effet que RS-1 corrige —
+la page devait dupliquer l'init inline. Mesuré le 08/09 sur banc jetable : `/assets/init.js`
+(forme **racine-relative**, celle d'une application servie depuis sa racine web) et
+`init.js?v=3` (**suffixe de cache**) rendaient tous deux G3 + G6 bloquants. Le suffixe `?…`
+et l'ancre `#…` sont désormais retirés avant résolution, et une référence racine-relative est
+cherchée **en remontant** depuis le dossier de la page — la racine du document n'étant pas
+connaissable d'un contrôle statique sur fichier, la première résolution existante gagne.
+Rien n'est assoupli : le fichier doit toujours exister et porter le motif hors commentaire ;
+sans résolution, la référence reste nommée dans `non_juge` et G3/G6 restent bloquants
+(voir `fixtures/cspracine/pages/{filtres-verte,filtres-rouge}-cspracine.html`).
+
 **Ce que l'oracle ne juge pas** (`non_juge`, déclaré à chaque exécution) : le comportement
 d'exécution réel (construction des panneaux, bascules Tous/Aucun, recherche, combinaison ET),
 qui exige un rendu navigateur. Le contrôle porte sur le **câblage**, pas sur le runtime. Pour

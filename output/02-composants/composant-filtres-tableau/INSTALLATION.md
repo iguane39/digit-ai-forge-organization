@@ -22,6 +22,7 @@ accord explicite.
 | `fixtures/filtres-verte.html` | `quality-oracles/fixtures/filtres-verte.html` |
 | `fixtures/filtres-rouge-cspexterne.html` + `fixtures/cspexterne/{rien.js,sans-print.css}` | `quality-oracles/fixtures/` (RS-1, TF-0837 : assets externes référencés mais sans init ni règle print) |
 | `fixtures/filtres-verte-cspexterne.html` + `fixtures/cspexterne/{init.js,print.css}` | `quality-oracles/fixtures/` (RS-1, TF-0837 : init et règle print portées par un asset externe déclaré, sans duplication inline) |
+| `fixtures/cspracine/` (dossier entier : `pages/{filtres-verte,filtres-rouge}-cspracine.html` + `assets/`) | `quality-oracles/fixtures/cspracine/` — **arborescence à conserver telle quelle** (RS-1 bis, TF-0837 : la page vit dans `pages/`, ses assets sont déclarés `/assets/…` ; aplatir le dossier ôterait au cas sa raison d'être) |
 
 Deux lignes sont aussi à ajouter dans `digit-ai-page-html/SKILL.md`, section « Composants » :
 le composant devient **obligatoire** (les tableaux de données en périmètre), là où la
@@ -62,6 +63,8 @@ node scripts/oracle-filtres-tableau.mjs fixtures/filtres-rouge.html             
 node scripts/oracle-filtres-tableau.mjs fixtures/filtres-verte.html              # attendu : PASS, exit 0
 node scripts/oracle-filtres-tableau.mjs fixtures/filtres-rouge-cspexterne.html   # attendu : FAIL G3+G6, exit 1 (RS-1)
 node scripts/oracle-filtres-tableau.mjs fixtures/filtres-verte-cspexterne.html   # attendu : PASS, exit 0 (RS-1)
+node scripts/oracle-filtres-tableau.mjs fixtures/cspracine/pages/filtres-rouge-cspracine.html  # attendu : FAIL G3+G6, exit 1 (RS-1 bis)
+node scripts/oracle-filtres-tableau.mjs fixtures/cspracine/pages/filtres-verte-cspracine.html  # attendu : PASS, exit 0 (RS-1 bis)
 node scripts/self-test.mjs                                                      # rejoue registre + fixtures
 ```
 
@@ -100,3 +103,22 @@ y compris sans aucune règle print réelle. Corrigé en retirant les commentaire
 `<!-- … -->`) du contenu externe avant jugement (`sansCommentaires()` dans
 `oracle-filtres-tableau.mjs`). Preuve : `filtres-rouge-cspexterne.html` référence ce même
 `table-filters.js` et échoue bien G6 après correction.
+
+### Durcissement RS-1 bis (TF-0837, 08/09) — la forme de référence d'une application servie
+
+RS-1 ne résolvait que la référence relative NUE. Or une application servie déclare
+ordinairement ses assets **depuis la racine web** (`/assets/init.js`) et leur ajoute un
+**suffixe de cache** (`init.js?v=3`) : dans ces deux formes, le fichier n'était pas trouvé,
+et la page retombait sur le défaut d'origine — dupliquer l'init inline sous nonce. Mesuré
+d'abord sur banc jetable hors dépôt, puis figé en fixtures.
+
+| Cas | Avant correctif | Après correctif |
+|---|---|---|
+| `cspracine/pages/filtres-verte-cspracine.html` (page dans `pages/`, assets déclarés `/assets/…`, `print.css?v=3`) | **FAIL** G3+G6 — `non_juge` : « assets référencés mais **illisibles** » | **PASS** — `non_juge` : « assets externes **lus** : /assets/table-filters.js, /assets/init.js, /assets/print.css?v=3 » |
+| `cspracine/pages/filtres-rouge-cspracine.html` (mêmes formes, assets existants mais motif en **commentaire** seulement) | FAIL G3+G6 (pour la mauvaise raison : illisibles) | FAIL G3+G6 (pour la bonne : **lus**, et sans câblage) |
+| Quatre fixtures antérieures | PASS / FAIL G1 / PASS / FAIL G3+G6 | identiques (non-régression) |
+
+La deuxième ligne mérite sa nuance : cette fixture rouge échouait **déjà** avant le
+correctif, donc son échec seul ne prouve rien. Ce qu'elle prouve est le **motif**, lisible
+dans `non_juge` : la référence passe d'« illisible » à « lue », et le verdict reste FAIL —
+résoudre un asset n'est pas l'admettre.

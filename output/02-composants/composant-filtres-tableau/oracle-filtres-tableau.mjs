@@ -82,6 +82,34 @@ function sansCommentaires(texte) {
   return texte.replace(/\/\*[\s\S]*?\*\//g, '').replace(/<!--[\s\S]*?-->/g, '');
 }
 
+/* RS-1 bis (TF-0837, 08/09) : DEUX formes de reference qu'une application SERVIE emploie
+   ordinairement echappaient encore a RS-1, et leur effet etait exactement le defaut que
+   RS-1 corrige — la page devait dupliquer l'init inline sous nonce. Mesure du 08/09 sur
+   banc jetable : une page dont les assets sont declares « /assets/init.js » (forme
+   racine-relative, celle d'une application servie depuis sa racine web) rendait G3 ET G6
+   bloquants ; idem avec un suffixe de cache « init.js?v=3 ».
+   RIEN N'EST ASSOUPLI : le fichier doit toujours EXISTER et porter reellement le motif hors
+   commentaire. Seule sa LOCALISATION est corrigee. La racine du document n'est pas
+   connaissable d'un controle statique sur fichier : une reference racine-relative est donc
+   cherchee en REMONTANT depuis le dossier de la page, premiere resolution existante gagne.
+   Sans resolution, la reference reste « manquante » et G3/G6 restent bloquants. */
+const REMONTEE_MAX = 8;
+
+function cheminsCandidats(dossier, url) {
+  const propre = url.split('#')[0].split('?')[0];      // ancre et suffixe de cache-busting
+  if (!propre) return [];
+  if (!propre.startsWith('/')) return [resolve(dossier, propre)];
+  const candidats = [];
+  let courant = dossier;
+  for (let i = 0; i <= REMONTEE_MAX; i++) {
+    candidats.push(resolve(courant, '.' + propre));
+    const parent = dirname(courant);
+    if (parent === courant) break;                     // racine du systeme de fichiers
+    courant = parent;
+  }
+  return candidats;
+}
+
 function corpusExterne(html, cheminPage) {
   if (!cheminPage) return { texte: '', lues: [], manquantes: [] };
   const dossier = dirname(cheminPage);
@@ -89,8 +117,13 @@ function corpusExterne(html, cheminPage) {
   let texte = '';
   for (const url of referencesExternes(html)) {
     if (/^(https?:)?\/\//i.test(url)) continue;
-    try { texte += '\n' + sansCommentaires(readFileSync(resolve(dossier, url), 'utf8')); lues.push(url); }
-    catch { manquantes.push(url); }
+    let contenu = null;
+    for (const candidat of cheminsCandidats(dossier, url)) {
+      try { contenu = readFileSync(candidat, 'utf8'); break; } catch { /* on tente le parent */ }
+    }
+    if (contenu === null) { manquantes.push(url); continue; }
+    texte += '\n' + sansCommentaires(contenu);
+    lues.push(url);
   }
   return { texte, lues, manquantes };
 }
