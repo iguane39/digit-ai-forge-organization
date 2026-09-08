@@ -1,0 +1,7 @@
+/* Asset externe de demonstration — RS-1 (TF-0837) : la regle de reaffichage a
+   l'impression vit ICI, dans une feuille de style externe referencee par
+   <link rel="stylesheet" href>, jamais dans un <style> inline du document audite. */
+@media print {
+  .tf-btn, .tf-panel { display:none !important; }
+  tr[data-tf-hidden] { display:table-row !important; }
+}

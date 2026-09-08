@@ -97,10 +97,18 @@ CSS : adapter aux tokens du livrable (voir `charte-et-tokens.md`), aucun hex en 
 |---|---|---|
 | **G1** | Tout tableau en périmètre porte `data-filterable`, ou une exemption `data-filterable="off"` **avec motif** | bloquant |
 | **G2** | L'asset `table-filters.js` est référencé (balise `<script src>` ou code inline exposant `DigitAITableFilters`) | bloquant |
-| **G3** | Chaque tableau `data-filterable` est initialisé (appel `init()` le désignant, ou `initAll()`) | bloquant |
+| **G3** | Chaque tableau `data-filterable` est initialisé (appel `init()` le désignant, ou `initAll()`) — dans le document **ou** dans un asset externe déclaré (`<script src>`) | bloquant |
 | **G4** | Chaque tableau `data-filterable` a un `id` et un `<thead>` porteur de `<th>` — prérequis du composant | bloquant |
 | **G5** | Un compteur `data-tf-count-for` avec `aria-live` existe pour chaque tableau `data-filterable` | bloquant |
-| **G6** | Une règle `@media print` réaffiche les lignes masquées (`tr[data-tf-hidden]`) | bloquant |
+| **G6** | Une règle `@media print` réaffiche les lignes masquées (`tr[data-tf-hidden]`) — dans le document **ou** dans une feuille externe déclarée (`<link rel="stylesheet" href>`) | bloquant |
+
+**RS-1 (TF-0837, 05/09)** : une application dont la CSP est `script-src 'self'` (aucun
+script inline, aucun nonce en fixture statique) n'a plus à dupliquer l'initialisation ou
+la règle print dans le document — G3 et G6 lisent aussi le fichier référencé par
+`<script src>` / `<link rel="stylesheet" href>`, résolu depuis le dossier de la page. La
+seule présence de la référence ne suffit jamais : le fichier doit exister et porter
+réellement le motif, hors de tout commentaire (voir `fixtures/filtres-rouge-cspexterne.html`
+et `fixtures/filtres-verte-cspexterne.html`).
 
 **Ce que l'oracle ne juge pas** (`non_juge`, déclaré à chaque exécution) : le comportement
 d'exécution réel (construction des panneaux, bascules Tous/Aucun, recherche, combinaison ET),

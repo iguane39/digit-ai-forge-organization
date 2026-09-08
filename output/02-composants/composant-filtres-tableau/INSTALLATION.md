@@ -20,6 +20,8 @@ accord explicite.
 | `oracle-filtres-tableau.mjs` | `quality-oracles/scripts/oracle-filtres-tableau.mjs` |
 | `fixtures/filtres-rouge.html` | `quality-oracles/fixtures/filtres-rouge.html` |
 | `fixtures/filtres-verte.html` | `quality-oracles/fixtures/filtres-verte.html` |
+| `fixtures/filtres-rouge-cspexterne.html` + `fixtures/cspexterne/{rien.js,sans-print.css}` | `quality-oracles/fixtures/` (RS-1, TF-0837 : assets externes référencés mais sans init ni règle print) |
+| `fixtures/filtres-verte-cspexterne.html` + `fixtures/cspexterne/{init.js,print.css}` | `quality-oracles/fixtures/` (RS-1, TF-0837 : init et règle print portées par un asset externe déclaré, sans duplication inline) |
 
 Deux lignes sont aussi à ajouter dans `digit-ai-page-html/SKILL.md`, section « Composants » :
 le composant devient **obligatoire** (les tableaux de données en périmètre), là où la
@@ -40,7 +42,7 @@ recherche dans le document est **optionnelle**. C'est la seule modification de t
   "type": "cli",
   "cmd": ["node", "{skilldir}/scripts/oracle-filtres-tableau.mjs", "{file}"],
   "content_patterns": ["<table"],
-  "checklist": "G1 tableau en périmètre (≥ 8 lignes et ≥ 1 colonne catégorielle) marqué data-filterable ou exempté avec motif · G2 asset table-filters.js référencé · G3 tableau initialisé · G4 id + thead porteur de th · G5 compteur data-tf-count-for avec aria-live · G6 règle @media print réaffichant tr[data-tf-hidden]",
+  "checklist": "G1 tableau en périmètre (≥ 8 lignes et ≥ 1 colonne catégorielle) marqué data-filterable ou exempté avec motif · G2 asset table-filters.js référencé · G3 tableau initialisé (document ou asset externe déclaré, RS-1/TF-0837) · G4 id + thead porteur de th · G5 compteur data-tf-count-for avec aria-live · G6 règle @media print réaffichant tr[data-tf-hidden] (document ou asset externe déclaré, RS-1/TF-0837)",
   "statut": "ok",
   "non_juge": [
     "comportement d'exécution (panneaux, Tous/Aucun, recherche, combinaison ET) — exige un rendu navigateur",
@@ -56,9 +58,11 @@ recherche dans le document est **optionnelle**. C'est la seule modification de t
 ## Vérification après installation
 
 ```bash
-node scripts/oracle-filtres-tableau.mjs fixtures/filtres-rouge.html   # attendu : FAIL, exit 1
-node scripts/oracle-filtres-tableau.mjs fixtures/filtres-verte.html   # attendu : PASS, exit 0
-node scripts/self-test.mjs                                            # rejoue registre + fixtures
+node scripts/oracle-filtres-tableau.mjs fixtures/filtres-rouge.html              # attendu : FAIL, exit 1
+node scripts/oracle-filtres-tableau.mjs fixtures/filtres-verte.html              # attendu : PASS, exit 0
+node scripts/oracle-filtres-tableau.mjs fixtures/filtres-rouge-cspexterne.html   # attendu : FAIL G3+G6, exit 1 (RS-1)
+node scripts/oracle-filtres-tableau.mjs fixtures/filtres-verte-cspexterne.html   # attendu : PASS, exit 0 (RS-1)
+node scripts/self-test.mjs                                                      # rejoue registre + fixtures
 ```
 
 ## Résultats de recette (exécutés le 20260808)
@@ -78,3 +82,21 @@ Les six règles discriminent indépendamment. Un défaut a été trouvé par le 
 corrigé : un tableau exempté sans motif rendait `PASS` tout en portant un finding bloquant —
 la branche « aucun tableau en périmètre » écrasait le verdict. Un bloquant prime désormais sur
 toute autre considération.
+
+### Durcissement RS-1 (TF-0837, 08/09) — G3/G6 admettent l'asset externe déclaré
+
+| Cas | Avant correctif | Après correctif |
+|---|---|---|
+| `filtres-verte-cspexterne.html` (init dans `cspexterne/init.js`, print dans `cspexterne/print.css`, rien d'inline) | **FAIL** G3+G6 (bug RS-1 reproduit) | PASS |
+| `filtres-rouge-cspexterne.html` (assets référencés, lisibles, mais sans init ni règle print) | FAIL G3+G6 | FAIL G3+G6 (inchangé — la seule référence ne suffit jamais) |
+| Fixtures historiques `filtres-rouge.html` / `filtres-verte.html` | FAIL G1 / PASS | FAIL G1 / PASS (non-régression) |
+
+Défaut trouvé pendant le durcissement, corrigé avant clôture : le premier correctif
+concaténait le contenu brut des assets externes au corpus jugé par G3/G6. L'en-tête de
+commentaire de `assets/table-filters.js` porte la phrase « *la regle @media print du
+livrable doit reafficher tr[data-tf-hidden]* » — un simple **commentaire de documentation**
+— qui suffisait à satisfaire G6 par sa prose, sur **toute** page référençant la librairie,
+y compris sans aucune règle print réelle. Corrigé en retirant les commentaires (`/* … */`,
+`<!-- … -->`) du contenu externe avant jugement (`sansCommentaires()` dans
+`oracle-filtres-tableau.mjs`). Preuve : `filtres-rouge-cspexterne.html` référence ce même
+`table-filters.js` et échoue bien G6 après correction.

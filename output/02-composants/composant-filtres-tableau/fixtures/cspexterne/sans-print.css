@@ -1,0 +1,4 @@
+/* Asset externe de la fixture rouge : feuille de style reelle, lisible, mais sans
+   aucune regle @media print — la seule presence d'un <link rel="stylesheet"> ne doit
+   jamais suffire a satisfaire G6. */
+.tf-btn { border:0; background:none; cursor:pointer; }

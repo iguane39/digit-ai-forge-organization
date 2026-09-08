@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Fixture rouge — assets externes référencés mais sans init ni règle print (RS-1 / TF-0837)</title>
+<link rel="stylesheet" href="cspexterne/sans-print.css">
+<style>
+  :root { --line:#e5e7eb; --muted:#6b7280; }
+  body { font-family: system-ui, sans-serif; padding:24px; }
+  table { border-collapse:collapse; }
+  th, td { border:1px solid var(--line); padding:6px 10px; text-align:left; }
+</style>
+</head>
+<body>
+<h1>Résultats d'exécution — run 412</h1>
+
+<!-- FIXTURE ROUGE (RS-1, TF-0837) : preuve que la seule presence d'un <script src>
+     et d'un <link rel="stylesheet"> ne suffit jamais — le contenu externe est lu,
+     mais ni init()/initAll() ni règle @media print n'y figurent.
+     Attendu : FAIL sur G3 et G6 (G1/G2/G4/G5 conformes, isolant les deux règles visées). -->
+<table id="runs" data-filterable>
+  <thead>
+    <tr><th>Suite</th><th>Statut</th><th data-filter-col="off">Durée</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>auth</td><td>Réussi</td><td>0,41 s</td></tr>
+    <tr><td>auth</td><td>Échec</td><td>1,23 s</td></tr>
+    <tr><td>auth</td><td>Réussi</td><td>0,38 s</td></tr>
+    <tr><td>api</td><td>Réussi</td><td>2,04 s</td></tr>
+    <tr><td>api</td><td>Échec</td><td>3,17 s</td></tr>
+    <tr><td>api</td><td>Ignoré</td><td>0,00 s</td></tr>
+    <tr><td>api</td><td>Réussi</td><td>1,88 s</td></tr>
+    <tr><td>ui</td><td>Réussi</td><td>4,52 s</td></tr>
+    <tr><td>ui</td><td>Échec</td><td>5,90 s</td></tr>
+    <tr><td>ui</td><td>Ignoré</td><td>0,01 s</td></tr>
+  </tbody>
+</table>
+<div class="tf-count" data-tf-count-for="runs" aria-live="polite"></div>
+
+<script src="../assets/table-filters.js"></script>
+<script src="cspexterne/rien.js"></script>
+</body>
+</html>
