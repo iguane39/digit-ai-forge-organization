@@ -1,8 +1,8 @@
 {
   "registre": "Types de documents — corpus Digit-AI",
   "decision_source": "D-04",
-  "version": "1.2.0",
-  "date_maj": "2026-08-15",
+  "version": "1.3.0",
+  "date_maj": "2026-09-11",
   "_lecture": {
     "role": "Source unique et machine-lisible des <Type> admis. D-04 promettait un référentiel tenu ; il n'existait qu'en tableau dans un document, donc ni interrogeable ni opposable à un vérificateur.",
     "gabarit_nom": "<Projet> - <Type> <Sujet> - AAAAMMJJ<indice>.<ext>",
@@ -290,6 +290,17 @@
       "premier_exemplaire": "Digit-AI - Etude Forge - Ingenierie des exigences P-10 - 20260808a.md",
       "date_ajout": "2026-08-08",
       "origine": "D-04, registre du 08/08"
+    },
+    {
+      "type": "CV",
+      "objet": "Curriculum vitae anonyme (dossier de competences) d un intervenant, remis a un client ou prospect sans reveler son identite",
+      "alias": [
+        "Curriculum",
+        "Dossier de competences"
+      ],
+      "premier_exemplaire": "digit-ai-marketing - CV anonyme BDO - 20260911a.html",
+      "date_ajout": "2026-09-11",
+      "origine": "decision humaine D-5 (a) du 11/09/2026, produit digit-ai-marketing (ledger seq 42 : retour emplacement-livrable-hors-convention) — gabarit gd-cv-anonyme"
     }
   ]
 }
