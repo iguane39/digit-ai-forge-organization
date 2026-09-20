@@ -304,11 +304,11 @@
     },
     {
       "type": "Rapprochement",
-      "objet": "Mise en regard de DEUX referentiels independants, avec les ecarts etablis dans les deux sens et le motif de chaque ecart — se distingue d'Inventaire (une seule source) et d'Audit (un referentiel juge contre une norme, pas confronte a un autre referentiel de meme rang)",
+      "objet": "Mise en regard de DEUX referentiels independants : ecarts etablis dans les deux sens, chaque ecart portant son motif. Se distingue d'Inventaire (une seule source, sans regle edictee) et d'Audit (un referentiel juge contre une norme) : ici, aucun des deux referentiels ne fait norme pour l'autre.",
       "alias": [],
       "premier_exemplaire": null,
       "date_ajout": "2026-09-14",
-      "origine": "TF-0977 (candidature du 08/09, decidee sous mandat de traitement integral du 08/09) — le livrable date « 20260908v » cite par la candidature (Produit-62 - RETOURS - 20260908k, forge/ledger.jsonl seq 69) est sorti sous le type Rapport faute de mieux ; ce depot n'a pas acces au poste de Produit-62, premier_exemplaire non verifie donc laisse a null (cf. _lecture.premier_exemplaire_null) plutot que recopie sans verification"
+      "origine": "TF-0977 (decidee sous mandat de traitement integral du 14/09/2026), source Produit-62 - RETOURS - 20260908k + forge/ledger.jsonl seq 69 — livrable 20260908v sorti sous le type Rapport, exact mais muet sur sa nature de comparaison a deux sens"
     }
   ]
 }
