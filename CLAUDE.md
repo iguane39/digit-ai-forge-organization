@@ -98,6 +98,7 @@ archive ses propres versions. C'est exactement le défaut corrigé le 2026-08-09
 # D-12 (non mécanisables) sortent en SANS_OBJET motivé, jamais tues (TF-0109)
 node oracles/oracle-conventions.mjs .
 node oracles/self-test.mjs          # fixtures verte et rouge — prouve que l'oracle peut échouer
+node oracles/decouvrir-oracles.mjs  # liste des oracles LUE SUR LE DISQUE (TF-1319, contrat du pilot)
 
 # Tout document produit ou modifié, avant commit — CONFORME exigé
 node "$HOME/.claude/skills/quality-oracles/scripts/run-oracles.mjs" "<fichier>"

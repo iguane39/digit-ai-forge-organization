@@ -118,5 +118,61 @@ for (const [nom, attendu] of CAS) {
   }
 }
 
-process.stdout.write(`\n${CAS.length - echecs}/${CAS.length} fixtures conformes (+ contrôle fraîcheur A0).\n`);
+// --- TF-1319 : la découverte des oracles LIT LE DISQUE, dans les deux sens. Le juge du pilot
+// (méta-oracle d'enclenchement) confronte ce que cette forge DÉCOUVRE aux verdicts consignés au
+// ledger d'un run. Une découverte qui raterait l'oracle livré avec son composant sous `output/` le
+// rendrait invisible au juge ; une découverte qui prendrait une recette, une fixture ou un vieux
+// gabarit sous `Old/` pour un oracle ferait accuser un run de n'avoir pas joué ce qui n'en est pas un.
+const casDecouverte = [];
+{
+  const DECOUVRIR = path.join(ICI, 'decouvrir-oracles.mjs');
+  const decouvre = (racine) => {
+    const r = spawnSync(process.execPath, [DECOUVRIR, ...(racine ? ['--racine', racine] : [])], { encoding: 'utf8' });
+    let j = null;
+    try { j = JSON.parse(r.stdout); } catch { /* sortie illisible : les contrôles ci-dessous la disent */ }
+    return { code: r.status, j };
+  };
+  const cas = (nom, tenu) => casDecouverte.push([nom, tenu]);
+  const reel = decouvre(null);
+  const cheminsReels = (reel.j?.oracles || []).map((o) => o.chemin);
+  cas(`decouverte-reelle (${cheminsReels.length} oracles, contrat digit-ai/decouverte-oracles@1, composant sous output/ compris)`,
+    reel.code === 0 && reel.j?.contrat === 'digit-ai/decouverte-oracles@1' && reel.j?.forge === 'digit-ai-forge-organization'
+    && cheminsReels.includes('oracles/oracle-conventions.mjs')
+    && cheminsReels.some((c) => /^output\/02-composants\/[^/]+\/oracle-filtres-tableau\.mjs$/.test(c))
+    && cheminsReels.every((c) => fs.existsSync(path.join(ICI, '..', c))));
+  const tmpDec = fs.mkdtempSync(path.join(os.tmpdir(), 'forge-organization-decouverte-'));
+  try {
+    const poser = (rel) => {
+      const p = path.join(tmpDec, rel);
+      fs.mkdirSync(path.dirname(p), { recursive: true });
+      fs.writeFileSync(p, '// fixture de découverte\n');
+    };
+    ['oracles/oracle-alpha.mjs', 'output/02-composants/composant-x/oracle-beta.mjs'].forEach(poser);
+    const leurres = ['oracles/oracle-alpha.test.mjs', 'oracles/self-test.mjs', 'oracles/fixtures/verte/oracle-faux.mjs',
+      'Old/oracle-vieux.mjs', 'node_modules/paquet/oracle-dep.mjs', 'input/oracle-entrant.mjs'];
+    leurres.forEach(poser);
+    const v = decouvre(tmpDec);
+    const noms = (v.j?.oracles || []).map((o) => o.nom).sort();
+    cas(`decouverte-verte (un oracle posé est découvert, output/ compris — obtenu ${JSON.stringify(noms)})`,
+      v.code === 0 && JSON.stringify(noms) === JSON.stringify(['oracle-alpha', 'oracle-beta']));
+    cas(`decouverte-rouge (${leurres.length} leurres — recette, fixture, archive Old/, dépendance, entrant — JAMAIS pris pour des oracles)`,
+      v.code === 0 && !(v.j?.oracles || []).some((o) => leurres.includes(o.chemin)));
+    poser('oracles/oracle-gamma.mjs');
+    const apres = decouvre(tmpDec);
+    cas('decouverte-ajout (un oracle AJOUTÉ est vu au passage suivant, sans liste à tenir)',
+      (apres.j?.oracles || []).some((o) => o.nom === 'oracle-gamma' && o.chemin === 'oracles/oracle-gamma.mjs'));
+  } finally {
+    fs.rmSync(tmpDec, { recursive: true, force: true });
+  }
+  const absente = decouvre(path.join(os.tmpdir(), 'forge-organization-racine-qui-n-existe-pas'));
+  cas(`decouverte-racine-absente (rouge : exit 2 avec motif, jamais une liste vide muette — obtenu exit ${absente.code})`,
+    absente.code === 2 && absente.j?.oracles?.length === 0 && /introuvable/.test(absente.j?.motif || ''));
+}
+for (const [nom, tenu] of casDecouverte) {
+  if (!tenu) echecs += 1;
+  process.stdout.write(`  ${tenu ? 'ok    ' : 'ECHEC '} ${nom}\n`);
+}
+const decouvertesTenues = casDecouverte.filter(([, tenu]) => tenu).length;
+
+process.stdout.write(`\n${CAS.length - echecs + (casDecouverte.length - decouvertesTenues)}/${CAS.length} fixtures conformes (+ contrôle fraîcheur A0, + découverte des oracles TF-1319 : ${decouvertesTenues}/${casDecouverte.length}).\n`);
 process.exit(echecs ? 1 : 0);
