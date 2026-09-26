@@ -11,6 +11,19 @@ accord explicite.
 > ici est **re-synchronisé depuis le skill** (js + css) et le restera à chaque évolution —
 > la checklist G1-G6 et l'oracle, eux, vivent ici.
 
+> **Parité de l'oracle avec sa copie installée (TF-1336, 26/09).** La phrase ci-dessus désigne
+> déjà la référence pour l'ORACLE (à distinguer des assets, dont la référence est le skill) :
+> **`oracle-filtres-tableau.mjs` de CE dossier est la copie de référence.** Constaté le
+> 23/09/2026 : la copie installée dans `quality-oracles/scripts/` (et sa copie versionnée dans
+> `digit-ai-forge-agents`, identiques entre elles) étaient restées figées au 09/08/2026 pendant
+> que la référence évoluait ici jusqu'au 13/09/2026 — durcissements RS-1 et RS-1 bis (TF-0837)
+> compris. 78 lignes d'écart, jamais propagées, sans qu'aucun contrôle ne le voie.
+> `oracle-parite-filtres-tableau.mjs`, livré à côté, compare les deux octet par octet et rend
+> FAIL sur toute divergence (`node oracle-parite-filtres-tableau.mjs` — chemins par défaut,
+> ou `--reference`/`--autre` explicites). Il ne propage rien lui-même : la propagation vers
+> `quality-oracles/scripts/` touche `digit-ai-forge-agents`, hors du périmètre d'écriture de
+> qui l'a construit (TF-1336) — c'est un geste séparé, sur dépôt cible dédié.
+
 ## Destination des fichiers
 
 | Fichier produit | Destination |
@@ -66,6 +79,14 @@ node scripts/oracle-filtres-tableau.mjs fixtures/filtres-verte-cspexterne.html  
 node scripts/oracle-filtres-tableau.mjs fixtures/cspracine/pages/filtres-rouge-cspracine.html  # attendu : FAIL G3+G6, exit 1 (RS-1 bis)
 node scripts/oracle-filtres-tableau.mjs fixtures/cspracine/pages/filtres-verte-cspracine.html  # attendu : PASS, exit 0 (RS-1 bis)
 node scripts/self-test.mjs                                                      # rejoue registre + fixtures
+```
+
+**Parité avec la copie installée (TF-1336)** — à jouer depuis ce dossier, avant toute
+propagation vers `quality-oracles/scripts/` :
+
+```bash
+node oracle-parite-filtres-tableau.mjs              # compare cette référence à la copie installée ; FAIL si elles divergent
+node self-test-parite-filtres-tableau.mjs           # rejoue les fixtures de parité (verte/rouge) + les deux cas d'environnement
 ```
 
 ## Résultats de recette (exécutés le 20260808)

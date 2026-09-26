@@ -15,6 +15,7 @@ et encode.
 |---|---|---|---|
 | **Doctrine des conventions** | disposer de conventions arbitrées pour tous les projets | `conversationnel — documents comme points d'accroche (proposés au pilot, qui encode dans REGLES-PROJET.md)` | prouvé (experimental) |
 | **Composant filtres-tableau** | réutiliser un composant de filtres de tableau vérifié | `node output\02-composants\composant-filtres-tableau\oracle-filtres-tableau.mjs` | prouvé (experimental) |
+| **Parité oracle filtres-tableau** | savoir si la copie livrée avec le composant a divergé de la copie installée dans `quality-oracles` (TF-1336) | `node output\02-composants\composant-filtres-tableau\oracle-parite-filtres-tableau.mjs` | prouvé (experimental) |
 | **Études normatives** | ancrer les pratiques sur les normes du métier | `conversationnel` | déclaré (experimental) |
 | **Gate de conventions packagé** | vérifier les conventions en pre-commit/CI sans dépendre de la forge | `node output\02-composants\gate-conventions\gate-conventions.mjs [--staged]` | prouvé (experimental) |
 
