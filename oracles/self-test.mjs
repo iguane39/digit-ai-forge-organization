@@ -42,6 +42,7 @@ const CAS = [
 const REGLES_SANS_OBJET_ATTENDUES = ['D-01', 'D-07', 'D-08', 'D-11', 'D-12'];
 
 let echecs = 0;
+let echecsCas = 0; // TF-1336 — décompte propre aux fixtures CAS, distinct de la fraîcheur A0
 for (const [nom, attendu] of CAS) {
   const r = spawnSync(process.execPath, [ORACLE, path.join(FIX, nom), '--json'], { encoding: 'utf8' });
   const ecarts = [];
@@ -84,38 +85,67 @@ for (const [nom, attendu] of CAS) {
 
   if (ecarts.length) {
     echecs += 1;
+    echecsCas += 1;
     process.stdout.write(`  ECHEC  ${nom}\n${ecarts.map((e) => `         ${e}`).join('\n')}\n`);
   } else {
     process.stdout.write(`  ok     ${nom}\n`);
   }
 }
 
-// --- TF-0076 : fraîcheur du gabarit A0 — la version de socle DÉCLARÉE est comparée à
-// la version INSTALLÉE. La dérive du 09/08 (4 itérations perdues) venait de l'absence de
-// ce rapprochement : le gabarit déclarait un alignement que rien ne vérifiait.
+// --- TF-0076 / TF-1336 : fraîcheur du gabarit A0 — la version de socle DÉCLARÉE est comparée à
+// la version INSTALLÉE. La dérive du 09/08 (4 itérations perdues) venait de l'absence de ce
+// rapprochement : le gabarit déclarait un alignement que rien ne vérifiait.
+//
+// TF-1336 (26/09) — DEUX défauts trouvés sur ce bloc lui-même, corrigés ici :
+//   1) l'extraction lisait le PREMIER « digit-ai-page-html <version> » rencontré n'importe où
+//      dans la prose — y compris dans un bullet d'historique purement narratif (« réalignement
+//      sur le socle … 1.6.0 », vrai le jour où il a été écrit, faux comme déclaration vivante
+//      une fois le socle reparti). Même prudence que D-18 d'oracle-conventions.mjs, dont la
+//      première écriture a produit des faux positifs par proximité : la version comptée est
+//      désormais celle d'une ligne qui SE DÉSIGNE elle-même (« Socle aligné » en tête de
+//      document), jamais une mention trouvée par proximité dans un paragraphe narratif.
+//   2) ce rouge de fraîcheur était compté dans le MÊME total que les 12 fixtures CAS
+//      (« 11/12 fixtures conformes (+ contrôle fraîcheur A0) », constat du 23/09) — deux
+//      verdicts mélangés en un seul chiffre. Il a désormais son verdict PROPRE, nommé, dans le
+//      résumé final ; `echecsCas` (fixtures) et `echecFraicheur` (ci-dessous) ne se mélangent
+//      plus — seul `echecs`, qui gouverne le code de sortie, agrège toujours les deux.
+let echecFraicheur = false;
+let messageFraicheur = '';
 {
   const racine = path.join(ICI, '..');
   const a0s = fs.readdirSync(racine).filter((f) => /Gabarit A0 .* - \d{8}[a-z]\.md$/.test(f)).sort();
   const skillInstalle = path.join(os.homedir(), '.claude', 'skills', 'digit-ai-page-html', 'SKILL.md');
   if (!a0s.length) {
     echecs += 1;
-    process.stdout.write('  ECHEC  fraicheur-a0 : aucun gabarit A0 trouvé à la racine\n');
+    echecFraicheur = true;
+    messageFraicheur = 'aucun gabarit A0 trouvé à la racine';
   } else if (!fs.existsSync(skillInstalle)) {
-    process.stdout.write('  ok     fraicheur-a0 (socle non installé sur ce poste — non jugeable)\n');
+    messageFraicheur = 'socle non installé sur ce poste — non jugeable';
   } else {
     const a0 = fs.readFileSync(path.join(racine, a0s[a0s.length - 1]), 'utf8');
-    const declare = (a0.match(/digit-ai-page-html[`»\s]*\s*(\d+\.\d+\.\d+)/) || [])[1];
+    // Ligne qui se désigne elle-même (cf. D-18) : seule une ligne débutant par « Socle aligné »
+    // (gras markdown optionnel) vaut déclaration. Une mention de version dans une autre phrase
+    // — historique, source datée, exemple — n'est jamais lue ici, quelle que soit sa position.
+    // Pas de `\b` final : « é » n'est pas un caractère de mot pour \b en mode non-unicode JS —
+    // « Socle aligné » suivi d'un espace n'offre alors AUCUNE frontière \w/\W et le motif ne
+    // matchait jamais. Trouvé en rejouant ce contrôle juste après l'avoir écrit (TF-1009 : jouer
+    // le remède qu'on recommande, jamais le supposer vert sans le lancer).
+    const ligneDeclaration = a0.split(/\r?\n/).find((l) => /^\*{0,2}Socle aligné/.test(l.trim()));
+    const declare = ligneDeclaration && (ligneDeclaration.match(/digit-ai-page-html[`»\s]*\s*(\d+\.\d+\.\d+)/) || [])[1];
     const installe = (fs.readFileSync(skillInstalle, 'utf8').match(/version:\s*"?(\d+\.\d+\.\d+)"?/) || [])[1];
     if (!declare) {
       echecs += 1;
-      process.stdout.write(`  ECHEC  fraicheur-a0 : ${a0s[a0s.length - 1]} ne déclare pas sa version de socle\n`);
+      echecFraicheur = true;
+      messageFraicheur = `${a0s[a0s.length - 1]} ne porte aucune ligne « Socle aligné » déclarant sa version de socle`;
     } else if (declare !== installe) {
       echecs += 1;
-      process.stdout.write(`  ECHEC  fraicheur-a0 : gabarit aligné sur ${declare}, socle installé ${installe} — réaligner le gabarit (la dérive silencieuse a coûté 4 itérations le 09/08)\n`);
+      echecFraicheur = true;
+      messageFraicheur = `gabarit aligné sur ${declare}, socle installé ${installe} — réaligner le gabarit (la dérive silencieuse a coûté 4 itérations le 09/08)`;
     } else {
-      process.stdout.write(`  ok     fraicheur-a0 (déclaré ${declare} = installé ${installe})\n`);
+      messageFraicheur = `déclaré ${declare} = installé ${installe}`;
     }
   }
+  process.stdout.write(`  ${echecFraicheur ? 'ECHEC ' : 'ok    '} fraicheur-a0 : ${messageFraicheur}\n`);
 }
 
 // --- TF-1319 : la découverte des oracles LIT LE DISQUE, dans les deux sens. Le juge du pilot
@@ -174,5 +204,12 @@ for (const [nom, tenu] of casDecouverte) {
 }
 const decouvertesTenues = casDecouverte.filter(([, tenu]) => tenu).length;
 
-process.stdout.write(`\n${CAS.length - echecs + (casDecouverte.length - decouvertesTenues)}/${CAS.length} fixtures conformes (+ contrôle fraîcheur A0, + découverte des oracles TF-1319 : ${decouvertesTenues}/${casDecouverte.length}).\n`);
+// TF-1336 — trois verdicts NOMMÉS et INDÉPENDANTS, jamais mélangés dans un seul chiffre : le
+// compte de fixtures CAS ne bouge plus quand seule la fraîcheur A0 est rouge (le défaut exact
+// du 23/09 : « 11/12 fixtures conformes (+ contrôle fraîcheur A0) », un rouge de fraîcheur lu
+// comme une fixture ratée). Le code de sortie, lui, reste la somme des trois : un seul verdict
+// rouge suffit à faire échouer tout le self-test.
+process.stdout.write(`\n${CAS.length - echecsCas}/${CAS.length} fixtures conformes.\n`);
+process.stdout.write(`fraîcheur A0 : ${echecFraicheur ? 'ECHEC' : 'ok'} (${messageFraicheur}).\n`);
+process.stdout.write(`découverte des oracles TF-1319 : ${decouvertesTenues}/${casDecouverte.length}.\n`);
 process.exit(echecs ? 1 : 0);
