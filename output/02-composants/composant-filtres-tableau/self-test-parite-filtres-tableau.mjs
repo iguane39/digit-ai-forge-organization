@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // self-test-parite-filtres-tableau — prouve que oracle-parite-filtres-tableau.mjs peut échouer,
-// et pour la bonne raison (TF-1336, 26/09/2026). Quatre cas, chacun une branche distincte du
-// contrôle : deux fixtures à double sens (verte/rouge) et deux branches d'environnement qui ne
-// tiennent pas dans un fichier (dépôt tiers absent, chemin explicite absent).
+// et pour la bonne raison (TF-1336, 26/09/2026). Cinq cas, chacun une branche distincte du
+// contrôle : deux fixtures à double sens (verte/rouge), deux branches d'environnement qui ne
+// tiennent pas dans un fichier (dépôt tiers absent, chemin explicite absent), et depuis le 27/09
+// deux copies au même contenu dont seules les fins de ligne diffèrent.
 //
 // Usage : node self-test-parite-filtres-tableau.mjs   ·   exit 0 si tout tient, 1 sinon.
 
@@ -72,5 +73,27 @@ const cas = (nom, tenu) => {
     r.status === 1 && j?.verdict === 'FAIL' && (j?.findings || []).some((f) => f.regle === 'PARITE'));
 }
 
-process.stdout.write(`\n${4 - echecs}/4 cas conformes.\n`);
+// 5) Même contenu, fins de ligne différentes — PASS, exit 0 (27/09/2026, reste de TF-1336). Les
+// deux copies sont écrites à l'exécution dans un dossier jetable : une fixture en CRLF enregistrée
+// au dépôt serait normalisée par git et ne prouverait plus rien. Sans la normalisation de
+// l'oracle, ce cas rend FAIL, « 3 ligne(s) en référence, 3 en autre, premier écart à la ligne 4 »
+// (mesuré le 27/09 sur la version précédente : les lignes sont égales, seuls les textes diffèrent).
+{
+  const dossier = fs.mkdtempSync(path.join(os.tmpdir(), 'forge-organization-parite-eol-'));
+  try {
+    const contenu = "// copie de référence\nexport const x = 1;\n";
+    fs.writeFileSync(path.join(dossier, 'lf.mjs'), contenu);
+    fs.writeFileSync(path.join(dossier, 'crlf.mjs'), contenu.replace(/\n/g, '\r\n'));
+    const r = lancer(['--reference', path.join(dossier, 'lf.mjs'), '--autre', path.join(dossier, 'crlf.mjs')]);
+    let j = null;
+    try { j = JSON.parse(r.stdout); } catch { /* dit par le contrôle ci-dessous */ }
+    cas(`parite-fins-de-ligne (même contenu, LF d'un côté et CRLF de l'autre → PASS, exit 0 — obtenu exit ${r.status}, verdict ${j?.verdict})`,
+      r.status === 0 && j?.verdict === 'PASS');
+  } finally {
+    fs.rmSync(dossier, { recursive: true, force: true });
+  }
+}
+
+const TOTAL = 5;
+process.stdout.write(`\n${TOTAL - echecs}/${TOTAL} cas conformes.\n`);
 process.exit(echecs ? 1 : 0);

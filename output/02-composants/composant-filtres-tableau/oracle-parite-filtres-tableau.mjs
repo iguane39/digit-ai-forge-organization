@@ -20,8 +20,10 @@
  * nouveau SANS qu'une source ne désigne la référence, ce contrôle continue de détecter la
  * divergence ; il ne désigne jamais lui-même laquelle corriger — c'est un arbitrage humain.
  *
- * LA RÈGLE : lit les deux fichiers OCTET PAR OCTET, ici et maintenant — jamais une conclusion
- * mise en cache. Identiques → PASS. Différents → FAIL, écart résumé (nombre de lignes de chaque
+ * LA RÈGLE : lit les deux fichiers ici et maintenant — jamais une conclusion mise en cache — et les
+ * compare OCTET PAR OCTET une fois leurs fins de ligne ramenées à LF (27/09/2026 : la politique de
+ * fins de ligne diffère entre les deux dépôts, et ce n'est pas une divergence de contenu).
+ * Identiques → PASS. Différents → FAIL, écart résumé (nombre de lignes de chaque
  * côté, numéro de la première ligne qui diffère). Le dépôt tiers absent de ce poste (jamais
  * cloné) est NON JUGEABLE (INCONCLUSIF) — jamais un FAIL silencieux, jamais un PASS qui ne
  * prouve rien. Le dépôt présent mais le fichier manquant à l'emplacement attendu EST une
@@ -129,8 +131,14 @@ if (!existsSync(autre)) {
   sortir(1);
 }
 
-const texteRef = readFileSync(reference, 'utf8');
-const texteAutre = readFileSync(autre, 'utf8');
+// Les fins de ligne se ramènent à LF des deux côtés AVANT de comparer (27/09/2026, reste de
+// TF-1336). Les deux dépôts n'ont pas la même politique : forge-agents force LF sur ses `.mjs`
+// (.gitattributes, TF-0021), ce dépôt n'en déclare aucune et s'extrait en CRLF sous
+// core.autocrlf=true. Mesuré le 27/09 : les deux blobs enregistrés étaient identiques octet pour
+// octet, et l'oracle rendait pourtant FAIL sur toute extraction propre, « premier écart à la ligne
+// 211 » — un artefact d'extraction pris pour une divergence. Un vrai écart de CONTENU reste un FAIL.
+const texteRef = readFileSync(reference, 'utf8').replace(/\r\n/g, '\n');
+const texteAutre = readFileSync(autre, 'utf8').replace(/\r\n/g, '\n');
 
 if (texteRef === texteAutre) {
   OUT.verdict = 'PASS';
