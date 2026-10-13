@@ -1,8 +1,8 @@
 {
   "registre": "Types de documents — corpus Digit-AI",
   "decision_source": "D-04",
-  "version": "1.4.0",
-  "date_maj": "2026-09-14",
+  "version": "1.5.0",
+  "date_maj": "2026-10-13",
   "_lecture": {
     "role": "Source unique et machine-lisible des <Type> admis. D-04 promettait un référentiel tenu ; il n'existait qu'en tableau dans un document, donc ni interrogeable ni opposable à un vérificateur.",
     "gabarit_nom": "<Projet> - <Type> <Sujet> - AAAAMMJJ<indice>.<ext>",
@@ -309,6 +309,17 @@
       "premier_exemplaire": null,
       "date_ajout": "2026-09-14",
       "origine": "TF-0977 (decidee sous mandat de traitement integral du 14/09/2026), source Produit-62 - RETOURS - 20260908k + forge/ledger.jsonl seq 69 — livrable 20260908v sorti sous le type Rapport, exact mais muet sur sa nature de comparaison a deux sens"
+    },
+    {
+      "type": "Présentation",
+      "objet": "Support projeté devant un auditoire (diapositives) pour restituer, décider ou former ; sa trame Markdown précède le rendu PowerPoint. Se distingue de Rapport (document lu seul, sans orateur) et de Note (texte court sans support projeté).",
+      "alias": [
+        "Note de présentation",
+        "Présentation restitution"
+      ],
+      "premier_exemplaire": null,
+      "date_ajout": "2026-10-13",
+      "origine": "TF-1389 (décidé sous mandat global du 13/10/2026 « Traite tous les TODOs candidat ») : famille gd-presentation-restitution-audit ajoutée au catalogue des gabarits du pilot, nom de livrable du 24/09 non résolu faute de type"
     }
   ]
 }
