@@ -1,8 +1,8 @@
 {
   "registre": "Types de documents — corpus Digit-AI",
   "decision_source": "D-04",
-  "version": "1.5.0",
-  "date_maj": "2026-10-13",
+  "version": "1.6.0",
+  "date_maj": "2026-10-15",
   "_lecture": {
     "role": "Source unique et machine-lisible des <Type> admis. D-04 promettait un référentiel tenu ; il n'existait qu'en tableau dans un document, donc ni interrogeable ni opposable à un vérificateur.",
     "gabarit_nom": "<Projet> - <Type> <Sujet> - AAAAMMJJ<indice>.<ext>",
@@ -320,6 +320,16 @@
       "premier_exemplaire": null,
       "date_ajout": "2026-10-13",
       "origine": "TF-1389 (décidé sous mandat global du 13/10/2026 « Traite tous les TODOs candidat ») : famille gd-presentation-restitution-audit ajoutée au catalogue des gabarits du pilot, nom de livrable du 24/09 non résolu faute de type"
+    },
+    {
+      "type": "Fiche",
+      "objet": "Document de référence court et structuré qui décrit un objet unique (produit, offre technique, composant) par chapitres fixes et tableaux recomptables, issu d'un gabarit de la bibliothèque du pilot (gd-fiche-produit). Se distingue de Rapport (constat d'une analyse) et de Note (texte court sans structure imposée).",
+      "alias": [
+        "Fiche produit"
+      ],
+      "premier_exemplaire": null,
+      "date_ajout": "2026-10-15",
+      "origine": "TF-1713 (décidé sous mandat humain du 15/10/2026 « Traite tous les TODOs & retours ») : le gabarit gd-fiche-produit du pilot prescrit le type Fiche, que R-25 refusait faute d'entrée au registre ; source Produit-83 - RETOURS - 20261014a (RT-3)"
     }
   ]
 }
