@@ -94,6 +94,16 @@ const cas = (nom, tenu) => {
   }
 }
 
-const TOTAL = 5;
+// 6 et 7) Les assets de ce dossier sont une copie du skill qui s'exécute (INSTALLATION.md, « re-synchronisé
+// depuis le skill ») : rien ne le vérifiait, et la copie a dérivé jusqu'au 02/11/2026 (TF-2035). Hors du parc,
+// le skill est absent : le cas le dit et ne compte pas comme une dérive.
+for (const nom of ['table-filters.js', 'table-filters.css']) {
+  const source = path.join(ICI, '..', '..', '..', '..', 'digit-ai-forge-agents', '.claude', 'skills', 'digit-ai-page-html', 'assets', nom);
+  if (!fs.existsSync(source)) { cas(`assets/${nom} : skill absent du parc, non jugé`, true); continue; }
+  const r = lancer(['--reference', source, '--autre', path.join(ICI, 'assets', nom)]);
+  cas(`assets/${nom} identique à la copie du skill digit-ai-page-html (exit ${r.status})`, r.status === 0);
+}
+
+const TOTAL = 7;
 process.stdout.write(`\n${TOTAL - echecs}/${TOTAL} cas conformes.\n`);
 process.exit(echecs ? 1 : 0);
