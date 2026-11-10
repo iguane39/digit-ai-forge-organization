@@ -1,8 +1,8 @@
 {
   "registre": "Types de documents — corpus Digit-AI",
   "decision_source": "D-04",
-  "version": "1.6.0",
-  "date_maj": "2026-10-15",
+  "version": "1.7.0",
+  "date_maj": "2026-11-10",
   "_lecture": {
     "role": "Source unique et machine-lisible des <Type> admis. D-04 promettait un référentiel tenu ; il n'existait qu'en tableau dans un document, donc ni interrogeable ni opposable à un vérificateur.",
     "gabarit_nom": "<Projet> - <Type> <Sujet> - AAAAMMJJ<indice>.<ext>",
@@ -330,6 +330,27 @@
       "premier_exemplaire": null,
       "date_ajout": "2026-10-15",
       "origine": "TF-1713 (décidé sous mandat humain du 15/10/2026 « Traite tous les TODOs & retours ») : le gabarit gd-fiche-produit du pilot prescrit le type Fiche, que R-25 refusait faute d'entrée au registre ; source Produit-83 - RETOURS - 20261014a (RT-3)"
+    },
+    {
+      "type": "Publication",
+      "objet": "Archive datée d'une publication sur un réseau (texte publié, réseau, modèle, date réelle de mise en ligne), tenue chez le produit après l'accord humain du lot (RUN-RESEAU, N3). Se distingue de Note (texte court sans destination publique) et de Rapport (constat d'une analyse).",
+      "alias": [
+        "Publication réseau"
+      ],
+      "premier_exemplaire": null,
+      "date_ajout": "2026-11-10",
+      "origine": "TF-2388 (décidé sous R-58, demande « Traite les TODOs et retours » du 09/11/2026 et réponse « 190b puis A2 » du 10/11/2026) : RUN-RESEAU.md du pilot prescrit l'archive datée de chaque publication (N3) et une vue de mesures (N5), sans type au registre ; le produit marketing nommait sa vue « Rapport Mesures » faute de mieux ; source : lot de retours du produit marketing 20261109c (ledger seq 271)"
+    },
+    {
+      "type": "Mesures",
+      "objet": "Vue périodique des indicateurs d'un compte ou d'un produit (valeurs relevées, seuils, écart à l'état de départ), tirée d'un export ou d'une sonde et datée (RUN-RESEAU, N5). Se distingue de Dashboard (page interactive qui se rafraîchit) et de Rapport (constat d'une analyse).",
+      "alias": [
+        "Rapport Mesures",
+        "Vue Mesures"
+      ],
+      "premier_exemplaire": null,
+      "date_ajout": "2026-11-10",
+      "origine": "TF-2388 (décidé sous R-58, demande « Traite les TODOs et retours » du 09/11/2026 et réponse « 190b puis A2 » du 10/11/2026) : RUN-RESEAU.md du pilot prescrit l'archive datée de chaque publication (N3) et une vue de mesures (N5), sans type au registre ; le produit marketing nommait sa vue « Rapport Mesures » faute de mieux ; source : lot de retours du produit marketing 20261109c (ledger seq 271)"
     }
   ]
 }
