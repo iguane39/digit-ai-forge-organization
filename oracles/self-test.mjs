@@ -12,6 +12,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { jugerFraicheurA0, versionDuManifeste } from './fraicheur-a0.mjs';
 
 const ICI = path.dirname(fileURLToPath(import.meta.url));
 const ORACLE = path.join(ICI, 'oracle-conventions.mjs');
@@ -111,42 +112,70 @@ for (const [nom, attendu] of CAS) {
 //      plus — seul `echecs`, qui gouverne le code de sortie, agrège toujours les deux.
 let echecFraicheur = false;
 let messageFraicheur = '';
+const casFraicheur = [];
 {
   const racine = path.join(ICI, '..');
   const a0s = fs.readdirSync(racine).filter((f) => /Gabarit A0 .* - \d{8}[a-z]\.md$/.test(f)).sort();
-  const skillInstalle = path.join(os.homedir(), '.claude', 'skills', 'digit-ai-page-html', 'SKILL.md');
+  // TF-2396 — la version attendue n'est plus écrite dans le gabarit : elle est LUE au manifeste
+  // versions-livrees.json de forge-agents (voir oracles/fraicheur-a0.mjs). Le manifeste se cherche
+  // chez FORGE_ROOT, puis chez le parent du dépôt, puis chez le parent du dépôt principal quand ce
+  // dépôt est un arbre de travail annexe (git worktree).
+  const racinesPossibles = [];
+  if (process.env.FORGE_ROOT) racinesPossibles.push(process.env.FORGE_ROOT);
+  racinesPossibles.push(path.join(racine, '..'));
+  const commun = spawnSync('git', ['-C', racine, 'rev-parse', '--path-format=absolute', '--git-common-dir'], { encoding: 'utf8' });
+  if (commun.status === 0 && commun.stdout.trim()) racinesPossibles.push(path.join(commun.stdout.trim(), '..', '..'));
+  const cheminManifeste = racinesPossibles
+    .map((r) => path.join(r, 'digit-ai-forge-agents', 'versions-livrees.json'))
+    .find((c) => fs.existsSync(c));
+  let versionManifeste = null;
+  if (cheminManifeste) {
+    try { versionManifeste = versionDuManifeste(JSON.parse(fs.readFileSync(cheminManifeste, 'utf8').replace(/^\uFEFF/, ''))); } catch { /* manifeste illisible : non jugeable, dit ci-dessous */ }
+  }
+  let verdict;
   if (!a0s.length) {
+    verdict = { verdict: 'echec', message: 'aucun gabarit A0 trouvé à la racine' };
+  } else if (!cheminManifeste) {
+    verdict = { verdict: 'non_jugeable', message: 'manifeste versions-livrees.json de forge-agents introuvable sur ce poste — non jugeable' };
+  } else {
+    verdict = jugerFraicheurA0(fs.readFileSync(path.join(racine, a0s[a0s.length - 1]), 'utf8'), versionManifeste);
+    if (verdict.verdict === 'echec') verdict.message = `${a0s[a0s.length - 1]} : ${verdict.message}`;
+  }
+  if (verdict.verdict === 'echec') {
     echecs += 1;
     echecFraicheur = true;
-    messageFraicheur = 'aucun gabarit A0 trouvé à la racine';
-  } else if (!fs.existsSync(skillInstalle)) {
-    messageFraicheur = 'socle non installé sur ce poste — non jugeable';
-  } else {
-    const a0 = fs.readFileSync(path.join(racine, a0s[a0s.length - 1]), 'utf8');
-    // Ligne qui se désigne elle-même (cf. D-18) : seule une ligne débutant par « Socle aligné »
-    // (gras markdown optionnel) vaut déclaration. Une mention de version dans une autre phrase
-    // — historique, source datée, exemple — n'est jamais lue ici, quelle que soit sa position.
-    // Pas de `\b` final : « é » n'est pas un caractère de mot pour \b en mode non-unicode JS —
-    // « Socle aligné » suivi d'un espace n'offre alors AUCUNE frontière \w/\W et le motif ne
-    // matchait jamais. Trouvé en rejouant ce contrôle juste après l'avoir écrit (TF-1009 : jouer
-    // le remède qu'on recommande, jamais le supposer vert sans le lancer).
-    const ligneDeclaration = a0.split(/\r?\n/).find((l) => /^\*{0,2}Socle aligné/.test(l.trim()));
-    const declare = ligneDeclaration && (ligneDeclaration.match(/digit-ai-page-html[`»\s]*\s*(\d+\.\d+\.\d+)/) || [])[1];
-    const installe = (fs.readFileSync(skillInstalle, 'utf8').match(/version:\s*"?(\d+\.\d+\.\d+)"?/) || [])[1];
-    if (!declare) {
-      echecs += 1;
-      echecFraicheur = true;
-      messageFraicheur = `${a0s[a0s.length - 1]} ne porte aucune ligne « Socle aligné » déclarant sa version de socle`;
-    } else if (declare !== installe) {
-      echecs += 1;
-      echecFraicheur = true;
-      messageFraicheur = `gabarit aligné sur ${declare}, socle installé ${installe} — réaligner le gabarit (la dérive silencieuse a coûté 4 itérations le 09/08)`;
-    } else {
-      messageFraicheur = `déclaré ${declare} = installé ${installe}`;
-    }
   }
+  messageFraicheur = verdict.message;
   process.stdout.write(`  ${echecFraicheur ? 'ECHEC ' : 'ok    '} fraicheur-a0 : ${messageFraicheur}\n`);
+
+  // TF-2396 — fixtures à double sens du contrôle lui-même, jouées sur des gabarits et des manifestes
+  // posés ici : le sens vert (une montée du socle ne rougit pas une déclaration dérivée) et les sens
+  // rouges (un numéro écrit à la main et périmé, une ligne absente, une ligne vide).
+  const derive = '**Socle aligné** : `digit-ai-page-html`, version lue au manifeste `versions-livrees.json`.\n';
+  const litteral = (v) => `**Socle aligné** : \`digit-ai-page-html\` ${v} — écrit à la main.\n`;
+  const cas = (nom, texte, attendue, verdictVoulu) => {
+    const v = jugerFraicheurA0(texte, attendue).verdict;
+    casFraicheur.push([`${nom} (obtenu ${v}, attendu ${verdictVoulu})`, v === verdictVoulu]);
+  };
+  cas('fraicheur-verte-derivee (déclaration dérivée, manifeste 1.45.1)', derive, '1.45.1', 'ok');
+  cas('fraicheur-verte-montee-du-socle (même gabarit, manifeste monté à 1.99.0 : ne rougit pas)', derive, '1.99.0', 'ok');
+  cas('fraicheur-verte-litterale-a-jour (numéro écrit = manifeste)', litteral('1.45.1'), '1.45.1', 'ok');
+  cas('fraicheur-rouge-litterale-perimee (numéro écrit 1.30.0, manifeste 1.45.1)', litteral('1.30.0'), '1.45.1', 'echec');
+  cas('fraicheur-rouge-sans-ligne (aucune ligne « Socle aligné »)', '# Gabarit\n\nUne mention digit-ai-page-html 1.45.1 dans la prose ne vaut pas déclaration.\n', '1.45.1', 'echec');
+  cas('fraicheur-rouge-ligne-vide (ni numéro, ni manifeste désigné)', '**Socle aligné** : le dernier.\n', '1.45.1', 'echec');
+  cas('fraicheur-non-jugeable (manifeste sans version : jamais un vert muet)', derive, null, 'non_jugeable');
+  const versions = [
+    versionDuManifeste({ skills: { 'digit-ai-page-html': { version: '1.45.1' } } }) === '1.45.1',
+    versionDuManifeste({ skills: { 'digit-ai-page-html': { version: null } } }) === null,
+    versionDuManifeste({}) === null,
+  ];
+  casFraicheur.push([`manifeste-lecture (version lue, null et absence rendues null — ${versions.filter(Boolean).length}/3)`, versions.every(Boolean)]);
 }
+for (const [nom, tenu] of casFraicheur) {
+  if (!tenu) echecs += 1;
+  process.stdout.write(`  ${tenu ? 'ok    ' : 'ECHEC '} ${nom}\n`);
+}
+const fraicheurTenue = casFraicheur.filter(([, tenu]) => tenu).length;
 
 // --- TF-1319 : la découverte des oracles LIT LE DISQUE, dans les deux sens. Le juge du pilot
 // (méta-oracle d'enclenchement) confronte ce que cette forge DÉCOUVRE aux verdicts consignés au
@@ -211,5 +240,7 @@ const decouvertesTenues = casDecouverte.filter(([, tenu]) => tenu).length;
 // rouge suffit à faire échouer tout le self-test.
 process.stdout.write(`\n${CAS.length - echecsCas}/${CAS.length} fixtures conformes.\n`);
 process.stdout.write(`fraîcheur A0 : ${echecFraicheur ? 'ECHEC' : 'ok'} (${messageFraicheur}).\n`);
+process.stdout.write(`cas de fraîcheur A0 TF-2396 : ${fraicheurTenue}/${casFraicheur.length}.
+`);
 process.stdout.write(`découverte des oracles TF-1319 : ${decouvertesTenues}/${casDecouverte.length}.\n`);
 process.exit(echecs ? 1 : 0);
