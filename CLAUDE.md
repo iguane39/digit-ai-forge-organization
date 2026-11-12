@@ -97,7 +97,7 @@ archive ses propres versions. C'est exactement le défaut corrigé le 2026-08-09
 # Conventions D-02/D-03/D-04/D-05/D-06/D-09/D-10 sur le stock du dépôt — D-01/D-07/D-08/D-11/
 # D-12 (non mécanisables) sortent en SANS_OBJET motivé, jamais tues (TF-0109)
 node oracles/oracle-conventions.mjs .
-node oracles/self-test.mjs          # fixtures verte et rouge — prouve que l'oracle peut échouer
+node oracles/self-test.mjs          # fixtures verte et rouge — prouve que l'oracle peut échouer ; compare aussi le gabarit A0 au socle : version (TF-2396) et liste des règles L (TF-2456)
 node oracles/decouvrir-oracles.mjs  # liste des oracles LUE SUR LE DISQUE (TF-1319, contrat du pilot)
 
 # Tout document produit ou modifié, avant commit — CONFORME exigé

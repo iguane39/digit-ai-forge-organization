@@ -13,6 +13,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { jugerFraicheurA0, versionDuManifeste } from './fraicheur-a0.mjs';
+import { jugerCouvertureLisibilite, reglesDuSocle } from './lisibilite-a0.mjs';
 
 const ICI = path.dirname(fileURLToPath(import.meta.url));
 const ORACLE = path.join(ICI, 'oracle-conventions.mjs');
@@ -182,6 +183,80 @@ for (const [nom, tenu] of casFraicheur) {
 }
 const fraicheurTenue = casFraicheur.filter(([, tenu]) => tenu).length;
 
+// --- TF-2456 : la LISTE des règles de lisibilité du gabarit A0 est comparée à celle du socle. La
+// fraîcheur ci-dessus juge un numéro de version ; elle ne prouve pas que le contenu suit (TF-1336) :
+// le 12/11/2026 le socle allait jusqu'à L39, le gabarit reprenait L1 à L37, et la recette était verte.
+// Verdict NOMMÉ, indépendant de la fraîcheur et des fixtures ; le code de sortie, lui, les agrège.
+let echecCouverture = false;
+let messageCouverture = '';
+const casCouverture = [];
+{
+  const racine = path.join(ICI, '..');
+  const a0s = fs.readdirSync(racine).filter((f) => /Gabarit A0 .* - \d{8}[a-z]\.md$/.test(f)).sort();
+  // Le socle se cherche comme le manifeste (FORGE_ROOT, parent du dépôt, parent du dépôt principal d'un
+  // worktree) dans la source versionnée de forge-agents, puis dans le socle installé du poste.
+  const racinesPossibles = [];
+  if (process.env.FORGE_ROOT) racinesPossibles.push(process.env.FORGE_ROOT);
+  racinesPossibles.push(path.join(racine, '..'));
+  const commun = spawnSync('git', ['-C', racine, 'rev-parse', '--path-format=absolute', '--git-common-dir'], { encoding: 'utf8' });
+  if (commun.status === 0 && commun.stdout.trim()) racinesPossibles.push(path.join(commun.stdout.trim(), '..', '..'));
+  const relatif = ['.claude', 'skills', 'digit-ai-page-html', 'references', 'lisibilite.md'];
+  const candidats = [
+    ...racinesPossibles.map((r) => path.join(r, 'digit-ai-forge-agents', ...relatif)),
+    path.join(os.homedir(), ...relatif),
+  ];
+  const cheminSocle = candidats.find((c) => fs.existsSync(c));
+  const texteSocle = cheminSocle ? fs.readFileSync(cheminSocle, 'utf8') : null;
+  let verdict;
+  if (!a0s.length) {
+    verdict = { verdict: 'echec', message: 'aucun gabarit A0 trouvé à la racine' };
+  } else {
+    verdict = jugerCouvertureLisibilite(fs.readFileSync(path.join(racine, a0s[a0s.length - 1]), 'utf8'), texteSocle);
+    if (verdict.verdict === 'echec') verdict.message = `${a0s[a0s.length - 1]} : ${verdict.message}`;
+  }
+  if (verdict.verdict === 'echec') {
+    echecs += 1;
+    echecCouverture = true;
+  }
+  messageCouverture = verdict.message;
+  process.stdout.write(`  ${echecCouverture ? 'ECHEC ' : 'ok    '} couverture-lisibilite-a0 : ${messageCouverture}\n`);
+
+  // Fixtures à double sens du contrôle lui-même, sur un socle et des gabarits posés ici : le sens vert,
+  // et un sens rouge par défaut distinct (règle absente, règle de trop, règle sans ligne A0, ligne A0
+  // inconnue, table absente), plus la montée du socle (une règle nouvelle rougit : c'est le but) et
+  // les deux refus de juger (socle introuvable, socle qui se contredit).
+  const socle = (...numeros) => `# Lisibilité — règles L1 à L${Math.max(...numeros)}\n\n${numeros.map((n) => `## L${n} — règle ${n}\n\nTexte.\n`).join('\n')}`;
+  const gabarit = (lignesTable, definitions = ['A0-1', 'A0-2', 'A0-3']) => `# Gabarit\n\n| ID | Exigence |\n|---|---|\n${definitions.map((d) => `| **${d}** | exigence |`).join('\n')}\n\n---\n\n## Couverture des règles de lisibilité du socle\n\n| Règle | Lignes A0 | Note |\n|---|---|---|\n${lignesTable.join('\n')}\n\n---\n\n## Suite\n`;
+  const complet = gabarit(['| **L1** | A0-1 | x |', '| **L2** | A0-2 | x |', '| **L4** | A0-3 | x |']);
+  const cas = (nom, obtenu, voulu, plus = true) => casCouverture.push([`${nom} (obtenu ${obtenu}, attendu ${voulu})`, obtenu === voulu && plus]);
+  const j = (g, s) => jugerCouvertureLisibilite(g, s);
+  cas('couverture-verte (L1, L2, L4 au socle sans L3 ; toutes nommées)', j(complet, socle(1, 2, 4)).verdict, 'ok');
+  const montee = j(complet, socle(1, 2, 4, 5));
+  cas('couverture-rouge-montee-du-socle (le socle gagne L5, le gabarit non : la recette rougit)', montee.verdict, 'echec', montee.manquantes.join() === '5');
+  const trouCite = j(gabarit(['| **L1** | A0-1 | x |', '| **L2** | A0-2 | x |', '| **L3** | A0-2 | x |', '| **L4** | A0-3 | x |']), socle(1, 2, 4));
+  cas('couverture-verte-numero-sans-section-cite (L3 jugée par le code du socle, sans section : portée, jamais de trop)', trouCite.verdict, 'ok', /portés quand même par le gabarit : L3/.test(trouCite.message));
+  const absente = j(gabarit(['| **L1** | A0-1 | x |', '| **L2** | A0-2 | x |']), socle(1, 2, 4));
+  cas('couverture-rouge-regle-absente (L4 du socle sans ligne dans la table)', absente.verdict, 'echec', absente.manquantes.join() === '4');
+  const trop = j(gabarit(['| **L1** | A0-1 | x |', '| **L2** | A0-2 | x |', '| **L4** | A0-3 | x |', '| **L9** | A0-3 | x |']), socle(1, 2, 4));
+  cas('couverture-rouge-regle-de-trop (L9 citée, absente du socle)', trop.verdict, 'echec', trop.en_trop.join() === '9');
+  const sansLigne = j(gabarit(['| **L1** | A0-1 | x |', '| **L2** | — | x |', '| **L4** | A0-3 | x |']), socle(1, 2, 4));
+  cas('couverture-rouge-sans-ligne-A0 (L2 nommée, aucune ligne A0 derrière)', sansLigne.verdict, 'echec', sansLigne.sans_ligne.join() === '2');
+  const inconnue = j(gabarit(['| **L1** | A0-1 | x |', '| **L2** | A0-2 | x |', '| **L4** | A0-9 | x |']), socle(1, 2, 4));
+  cas('couverture-rouge-ligne-A0-inconnue (A0-9 nommée, jamais définie)', inconnue.verdict, 'echec', inconnue.a0_inconnues.join() === 'A0-9');
+  cas('couverture-rouge-table-absente (aucune section de couverture)', j('# Gabarit\n\n| **A0-1** | x |\n', socle(1, 2, 4)).verdict, 'echec');
+  cas('couverture-ligne-citee-dans-un-bloc-de-code-ignoree (L4 dans un exemple balisé ne compte pas)',
+    j(gabarit(['| **L1** | A0-1 | x |', '| **L2** | A0-2 | x |', '```', '| **L4** | A0-3 | x |', '```']), socle(1, 2, 4)).verdict, 'echec');
+  cas('couverture-non-jugeable-socle-introuvable (jamais un vert muet)', j(complet, null).verdict, 'non_jugeable');
+  cas('couverture-non-jugeable-socle-contradictoire (annonce L1 à L9, dernière section L4)', j(complet, `${socle(1, 2, 4)}`.replace('L1 à L4', 'L1 à L9')).verdict, 'non_jugeable');
+  const lecture = reglesDuSocle('# Lisibilité — règles L1 à L33\n\n## L12 (virgules) — x\n\n### L18 bis — y\n\n## L32 / L33 — z\n\n```\n## L99 — cité dans un exemple\n```\n');
+  casCouverture.push([`socle-lecture (L12, L18, L32 et L33 lus, L99 cité en code ignoré — obtenu ${lecture.ids.join(',')})`, lecture.ids.join() === '12,18,32,33']);
+}
+for (const [nom, tenu] of casCouverture) {
+  if (!tenu) echecs += 1;
+  process.stdout.write(`  ${tenu ? 'ok    ' : 'ECHEC '} ${nom}\n`);
+}
+const couvertureTenue = casCouverture.filter(([, tenu]) => tenu).length;
+
 // --- TF-1319 : la découverte des oracles LIT LE DISQUE, dans les deux sens. Le juge du pilot
 // (méta-oracle d'enclenchement) confronte ce que cette forge DÉCOUVRE aux verdicts consignés au
 // ledger d'un run. Une découverte qui raterait l'oracle livré avec son composant sous `output/` le
@@ -247,5 +322,7 @@ process.stdout.write(`\n${CAS.length - echecsCas}/${CAS.length} fixtures conform
 process.stdout.write(`fraîcheur A0 : ${echecFraicheur ? 'ECHEC' : 'ok'} (${messageFraicheur}).\n`);
 process.stdout.write(`cas de fraîcheur A0 TF-2396 : ${fraicheurTenue}/${casFraicheur.length}.
 `);
+process.stdout.write(`couverture des règles de lisibilité TF-2456 : ${echecCouverture ? 'ECHEC' : 'ok'} (${messageCouverture}).\n`);
+process.stdout.write(`cas de couverture des règles de lisibilité TF-2456 : ${couvertureTenue}/${casCouverture.length}.\n`);
 process.stdout.write(`découverte des oracles TF-1319 : ${decouvertesTenues}/${casDecouverte.length}.\n`);
 process.exit(echecs ? 1 : 0);
