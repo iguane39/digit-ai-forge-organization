@@ -1,8 +1,8 @@
 {
   "registre": "Types de documents — corpus Digit-AI",
   "decision_source": "D-04",
-  "version": "1.7.0",
-  "date_maj": "2026-11-10",
+  "version": "1.8.0",
+  "date_maj": "2026-11-12",
   "_lecture": {
     "role": "Source unique et machine-lisible des <Type> admis. D-04 promettait un référentiel tenu ; il n'existait qu'en tableau dans un document, donc ni interrogeable ni opposable à un vérificateur.",
     "gabarit_nom": "<Projet> - <Type> <Sujet> - AAAAMMJJ<indice>.<ext>",
@@ -315,11 +315,12 @@
       "objet": "Support projeté devant un auditoire (diapositives) pour restituer, décider ou former ; sa trame Markdown précède le rendu PowerPoint. Se distingue de Rapport (document lu seul, sans orateur) et de Note (texte court sans support projeté).",
       "alias": [
         "Note de présentation",
-        "Présentation restitution"
+        "Présentation restitution",
+        "Support"
       ],
       "premier_exemplaire": null,
       "date_ajout": "2026-10-13",
-      "origine": "TF-1389 (décidé sous mandat global du 13/10/2026 « Traite tous les TODOs candidat ») : famille gd-presentation-restitution-audit ajoutée au catalogue des gabarits du pilot, nom de livrable du 24/09 non résolu faute de type"
+      "origine": "TF-1389 (décidé sous mandat global du 13/10/2026 « Traite tous les TODOs candidat ») : famille gd-presentation-restitution-audit ajoutée au catalogue des gabarits du pilot, nom de livrable du 24/09 non résolu faute de type ; alias « Support » ajouté le 12/11/2026 (TF-2427) : 22 noms du produit marketing (« Support Formation … », « Support Déroulé … »), tous des diapositives .pptx doublées d'un .pdf, désignent ce que l'objet décrit mot pour mot (« support projeté devant un auditoire »)"
     },
     {
       "type": "Fiche",
@@ -351,6 +352,35 @@
       "premier_exemplaire": null,
       "date_ajout": "2026-11-10",
       "origine": "TF-2388 (décidé sous R-58, demande « Traite les TODOs et retours » du 09/11/2026 et réponse « 190b puis A2 » du 10/11/2026) : RUN-RESEAU.md du pilot prescrit l'archive datée de chaque publication (N3) et une vue de mesures (N5), sans type au registre ; le produit marketing nommait sa vue « Rapport Mesures » faute de mieux ; source : lot de retours du produit marketing 20261109c (ledger seq 271)"
+    },
+    {
+      "type": "Programme",
+      "objet": "Programme d'une formation : objectifs, séquences, durée, public, prérequis et modalités d'évaluation, tel que l'exige la certification Qualiopi. Se distingue de Fiche (décrit un objet de catalogue, sans déroulé daté) et de Présentation (diapositives projetées devant les stagiaires).",
+      "alias": [],
+      "premier_exemplaire": null,
+      "date_ajout": "2026-11-12",
+      "origine": "TF-2427 (décidé sous R-58, réponse « A3 » du 12/11/2026) : 10 noms du produit marketing (5 formations, .docx doublé d'un .pdf) refusés par R-25, aucun type admis ne recoupe un document réglementaire de formation ; instruit seul, pas groupé avec les types voisins ci-dessous"
+    },
+    {
+      "type": "Évaluation",
+      "objet": "Outils d'évaluation d'une formation remis aux stagiaires : questionnaire de positionnement avant la séance, QCM final d'acquis, questionnaire de satisfaction ; pièces de preuve Qualiopi. Se distingue de Rapport (restitue une évaluation déjà dépouillée) et de Programme (annonce les modalités d'évaluation sans les porter).",
+      "alias": [
+        "Evaluation",
+        "Questionnaire"
+      ],
+      "premier_exemplaire": null,
+      "date_ajout": "2026-11-12",
+      "origine": "TF-2427 (décidé sous R-58, réponse « A3 » du 12/11/2026) : 10 noms du produit marketing (5 formations, .docx doublé d'un .pdf) refusés par R-25 ; aucun type admis ne recoupe une évaluation de stagiaires ; instruit seul. Alias « Questionnaire » (2 noms du même produit) : le document ouvert est un QCM final d'acquis, et le document « Évaluation » du même produit contient lui-même un questionnaire de positionnement ; « Questionnaire » désigne donc la même famille de pièces et ne justifie pas un type"
+    },
+    {
+      "type": "Émargement",
+      "objet": "Feuille de présence signée par les stagiaires et attestations de formation, pièces de preuve Qualiopi, à instancier à chaque session. Se distingue de PV (procès-verbal de ce qui a été décidé) et de Modèle (document vierge sans session).",
+      "alias": [
+        "Emargement"
+      ],
+      "premier_exemplaire": null,
+      "date_ajout": "2026-11-12",
+      "origine": "TF-2427 (décidé sous R-58, réponse « A3 » du 12/11/2026) : 6 noms du produit marketing (3 formations, .docx doublé d'un .pdf) refusés par R-25 ; aucun type admis ne recoupe une feuille de présence ; instruit seul"
     }
   ]
 }

@@ -36,6 +36,11 @@ const CAS = [
   // fixture verte, et le sens faible du contrôle pourrait disparaître sans que rien ne bouge.
   ['rouge-d18-version-divergente', { code: 1, bloquants: ['D-18'], avertissements: [] }],
   ['rouge-d18-nom-muet', { code: 0, bloquants: [], avertissements: ['D-18'] }],
+  // TF-2427 — deux sens pour l'instruction des 13 types du produit marketing : les types admis
+  // (Support en alias de Présentation ; Programme, Évaluation, Émargement, Questionnaire neufs)
+  // passent, et un type propre à un produit (Animation, Pitch) reste refusé par le registre.
+  ['verte-types-instruits', { code: 0, bloquants: [] }],
+  ['rouge-d04-type-reste-au-produit', { code: 1, bloquants: ['D-04'] }],
 ];
 
 // TF-0109 — les 5 décisions non mécanisables doivent être déclarées SANS_OBJET avec leur
